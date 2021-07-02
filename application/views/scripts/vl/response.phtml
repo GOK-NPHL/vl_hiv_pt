@@ -460,11 +460,13 @@ if (isset($this->shipment["shipment_test_report_date"]) && trim($this->shipment[
                 $('.ptNotPerformedSection').show();
                 $('.vlResultMandatory').css('visibility', 'hidden');
                 $('.vlResultValues').removeClass('isRequired');
+                $('#assayLotNumber').removeClass('isRequired');
                 $('#vlNotTestedReason').addClass('isRequired');
                 $('#ptNotTestedComments').addClass('isRequired');
             } else {
                 $('.vlResultSection').show();
                 $('.ptNotPerformedSection').hide();
+                $('#assayLotNumber').addClass('isRequired');
                 $('.vlResultMandatory').css('visibility', 'visible');
                 $('.vlResultValues').addClass('isRequired');
                 $('#vlNotTestedReason').removeClass('isRequired');
