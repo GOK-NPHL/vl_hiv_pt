@@ -800,7 +800,7 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
                 "INNER JOIN shipment_participant_map spm ON s.shipment_id = spm.shipment_id AND spm.is_pt_test_not_performed IS NULL ".
                 "INNER JOIN response_result_vl rrv ON rrv.shipment_map_id = spm.map_id AND refvl.sample_id = rrv.sample_id ".
                 "INNER JOIN platforms pl ON spm.platform_id = pl.ID $wherePlatform ".
-                "WHERE refvl.control = 0 AND spm.assay_id = $assayID".
+                "WHERE refvl.control = 0 AND spm.assay_id = $assayID ".
                 "GROUP BY s.shipment_id, spm.platform_id, refvl.sample_id";
 
         $responsesVLQuery = "SELECT spm.map_id, results.sample_id, ".
