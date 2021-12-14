@@ -121,7 +121,7 @@
                                     </td>
                                     <td style="text-align:center;">
                                         <?php
-                                        $zscore = "N/A";
+                                        $zscore = 0.00;
                                         if($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0){
                                         $zscore = round(abs(round($sample['reported_viral_load'],1)-$this->performanceStats[$sample['sample_id']]['reference_result'])/$this->performanceStats[$sample['sample_id']]['sdev_rvl'],1);
                                         }
