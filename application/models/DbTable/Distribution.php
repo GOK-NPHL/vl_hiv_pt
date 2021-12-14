@@ -764,7 +764,7 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
 
         $rResult = $this->getAdapter()->fetchAll($responsesVLQuery);
         $output['rawResults'] = $rResult;
-
+        $this->evaluate($parameters);
         return $output;
     }
 
