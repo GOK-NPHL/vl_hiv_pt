@@ -825,11 +825,17 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
                     array("shipment_map_id" => $aRow['map_id'],
                         "sample_id" => $aRow['sample_id']))
             );
-
+            error_log("Updating evaluation table -> responseResultVL");
+            error_log("Evaluation performed by ".$authNameSpace->admin_id."\n".
+            json_encode(array("calculated_score" => $aRow['score']))." WHERE ".
+            json_encode(
+                array("shipment_map_id" => $aRow['map_id'],
+                    "sample_id" => $aRow['sample_id'])));
             $responseResultVL->update(
                 array("calculated_score" => $aRow['score']),
                 "shipment_map_id = ".$aRow['map_id']." AND sample_id = ".$aRow['sample_id']
             );
+            error_log("Updates done");
         }
 
         $sQuery = "SELECT x.map_id, ROUND(SUM(score)/COUNT(*)*100) AS pass_fail FROM".
