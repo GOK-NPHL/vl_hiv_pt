@@ -27,6 +27,9 @@
  * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
+
+ // suppress error
+    error_reporting(0);
 class Zend_Registry extends ArrayObject
 {
     /**

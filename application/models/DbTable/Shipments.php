@@ -195,7 +195,7 @@ class Application_Model_DbTable_Shipments extends Zend_Db_Table_Abstract {
          * SQL queries
          * Get data to display */
         $sQuery = $this->getAdapter()->select()->from(array('s' => 'shipment'), array('s.scheme_type', 'SHIP_YEAR' => 'year(s.shipment_date)', 'TOTALSHIPMEN' => new Zend_Db_Expr("COUNT('s.shipment_id')")))
-                ->joinLeft(array('sp' => 'shipment_participant_map'), 's.shipment_id=sp.shipment_id', array('ONTIME' => new Zend_Db_Expr("COUNT(CASE substr(sp.evaluation_status,3,1) WHEN 1 THEN 1 END)"), 'NORESPONSE' => new Zend_Db_Expr("COUNT(CASE substr(sp.evaluation_status,2,1) WHEN 9 THEN 1 END)"), 'reported_count' => new Zend_Db_Expr("SUM(shipment_test_date <> '0000-00-00')")))
+                ->joinLeft(array('sp' => 'shipment_participant_map'), 's.shipment_id=sp.shipment_id', array('ONTIME' => new Zend_Db_Expr("COUNT(CASE substr(sp.evaluation_status,3,1) WHEN 1 THEN 1 END)"), 'NORESPONSE' => new Zend_Db_Expr("COUNT(CASE substr(sp.evaluation_status,2,1) WHEN 9 THEN 1 END)"), 'reported_count' => new Zend_Db_Expr("SUM(shipment_test_date <> null)")))
                 ->joinLeft(array('pmm' => 'participant_manager_map'), 'pmm.participant_id=sp.participant_id')
                 ->joinLeft(array('sl' => 'schemes'), 'sl.scheme_id=s.scheme_type')
                 ->where("s.status='shipped' OR s.status='evaluated' OR s.status='finalized'")
@@ -226,7 +226,7 @@ class Application_Model_DbTable_Shipments extends Zend_Db_Table_Abstract {
 
         /* Total data set length */
         $sQuery = $this->getAdapter()->select()->from(array('s' => 'shipment'), array('s.scheme_type', 'SHIP_YEAR' => 'year(s.shipment_date)', 'TOTALSHIPMEN' => new Zend_Db_Expr("COUNT('s.shipment_id')")))
-                ->joinLeft(array('sp' => 'shipment_participant_map'), 's.shipment_id=sp.shipment_id', array('ONTIME' => new Zend_Db_Expr("COUNT(CASE substr(sp.evaluation_status,3,1) WHEN 1 THEN 1 END)"), 'NORESPONSE' => new Zend_Db_Expr("COUNT(CASE substr(sp.evaluation_status,2,1) WHEN 9 THEN 1 END)"), 'reported_count' => new Zend_Db_Expr("SUM(shipment_test_date <> '0000-00-00')")))
+                ->joinLeft(array('sp' => 'shipment_participant_map'), 's.shipment_id=sp.shipment_id', array('ONTIME' => new Zend_Db_Expr("COUNT(CASE substr(sp.evaluation_status,3,1) WHEN 1 THEN 1 END)"), 'NORESPONSE' => new Zend_Db_Expr("COUNT(CASE substr(sp.evaluation_status,2,1) WHEN 9 THEN 1 END)"), 'reported_count' => new Zend_Db_Expr("SUM(shipment_test_date <> null)")))
                 ->joinLeft(array('pmm' => 'participant_manager_map'), 'pmm.participant_id=sp.participant_id')
                 ->joinLeft(array('sl' => 'schemes'), 'sl.scheme_id=s.scheme_type')
                 ->where("s.status='shipped' OR s.status='evaluated' OR s.status='finalized'")
@@ -438,7 +438,7 @@ class Application_Model_DbTable_Shipments extends Zend_Db_Table_Abstract {
             $getParams = '/sid/' . $aRow['shipment_id'] . '/pid/' . $aRow['participant_id'] . '/eid/' . $aRow['evaluation_status'] . '/pfid/' . $aRow['platform_id'] . '/aid/' . $aRow['assay_id'];
             
             if ($isEditable) {
-                if ($aRow['RESPONSEDATE'] != '' && $aRow['RESPONSEDATE'] != '0000-00-00') {
+                if ($aRow['RESPONSEDATE'] != '' && $aRow['RESPONSEDATE'] != null) {
                     if ($this->_session->view_only_access == 'no') {
                         if((new DateTime("now")) < (new DateTime($aRow['lastdate_response']))){
                             $delete = '<br/><a href="javascript:void(0);" onclick="removeSchemes(\'' . 
@@ -631,7 +631,7 @@ class Application_Model_DbTable_Shipments extends Zend_Db_Table_Abstract {
             $row[] = $aRow['STATUS'];
             $row[] = $general->humanDateFormat($aRow['RESPONSEDATE']);
 
-            // if($aRow['status']!='finalized' && $aRow['RESPONSEDATE']!='' && $aRow['RESPONSEDATE']!='0000-00-00'){
+            // if($aRow['status']!='finalized' && $aRow['RESPONSEDATE']!='' && $aRow['RESPONSEDATE']!=null){
             // $delete='<a href="javascript:void(0);" onclick="removeSchemes(\'' . $aRow['scheme_type']. '\',\'' . base64_encode($aRow['map_id']) . '\')" style="text-decoration : underline;"> Delete</a>';
             //}
             //if($isEditable){
@@ -643,7 +643,7 @@ class Application_Model_DbTable_Shipments extends Zend_Db_Table_Abstract {
             $download = '';
             $delete = '';
             if ($isEditable) {
-                if ($aRow['RESPONSEDATE'] != '' && $aRow['RESPONSEDATE'] != '0000-00-00') {
+                if ($aRow['RESPONSEDATE'] != '' && $aRow['RESPONSEDATE'] != null) {
                     if ($this->_session->view_only_access == 'no') {
                         $delete = '<br/><a href="javascript:void(0);" onclick="removeSchemes(\'' . $aRow['scheme_type'] . '\',\'' . base64_encode($aRow['map_id']) . '\')" class="btn btn-danger"  style="margin:3px 0;"> <i class="icon icon-remove-sign"></i> Delete Response</a>';
                     }
@@ -828,7 +828,7 @@ class Application_Model_DbTable_Shipments extends Zend_Db_Table_Abstract {
             //$aRow['lastdate_response'];
 
             $qcBtnText = " Quality Check";
-            if ($aRow['RESPONSEDATE'] != '' && $aRow['RESPONSEDATE'] != '0000-00-00') {
+            if ($aRow['RESPONSEDATE'] != '' && $aRow['RESPONSEDATE'] != null) {
                 if ($aRow['qc_date'] != "") {
                     $qcBtnText = " Edit Quality Check";
                     $aRow['qc_date'] = $general->humanDateFormat($aRow['qc_date']);
@@ -855,7 +855,7 @@ class Application_Model_DbTable_Shipments extends Zend_Db_Table_Abstract {
 
 
             if ($isEditable) {
-                if ($aRow['RESPONSEDATE'] != '' && $aRow['RESPONSEDATE'] != '0000-00-00') {
+                if ($aRow['RESPONSEDATE'] != '' && $aRow['RESPONSEDATE'] != null) {
                     if ($this->_session->view_only_access == 'no') {
                         $delete = '<br/><a href="javascript:void(0);" onclick="removeSchemes(\'' . $aRow['scheme_type'] . '\',\'' . base64_encode($aRow['map_id']) . '\')" class="btn btn-danger"  style="margin:3px 0;"> <i class="icon icon-remove-sign"></i> Delete Response</a>';
                     }
