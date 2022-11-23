@@ -3,29 +3,29 @@
         <strong><?php echo "{$this->shipment['scheme_name']} - {$this->platform['PlatformName']}"; ?> Performance</strong>
         <div style="margin: 0px auto 0px auto; text-align: center; float: right;">
             <a href="/admin/participants/individual-performance-report/mid/<?php echo $this->mid; ?>" target="blank" class="btn btn-primary">Download</a>
-            <a href="javascript:void(0)" class="btn btn-primary" onclick="javascript:window.history.back()" >Back</a>
+            <a href="javascript:void(0)" class="btn btn-primary" onclick="javascript:window.history.back()">Back</a>
         </div>
- 
+
     </h4>
 </section>
 <section class="content">
     <div class="box">
         <form>
             <div class="box-body">
-                <input type="hidden" id ="smid" name="smid" value="<?php echo $this->shipment['map_id']; ?>" />
-                <input type="hidden" id ="shipmentId" name="shipmentId" value="<?php echo $this->shipmentID; ?>" />
-                <input type="hidden" id ="participantId" name="participantId" value="<?php echo $this->participantId; ?>" />
-                <input type="hidden" id ="platformID" name="platformID" value="<?php echo $this->platformID; ?>" />
+                <input type="hidden" id="smid" name="smid" value="<?php echo $this->shipment['map_id']; ?>" />
+                <input type="hidden" id="shipmentId" name="shipmentId" value="<?php echo $this->shipmentID; ?>" />
+                <input type="hidden" id="participantId" name="participantId" value="<?php echo $this->participantId; ?>" />
+                <input type="hidden" id="platformID" name="platformID" value="<?php echo $this->platformID; ?>" />
                 <div id="view-content">
                     <div id=error></div>
 
                     <div class="report-logo">
                         <center><strong>
-                            <img src="/images/country/moh-logo.png" width="120px"><br>
-                            MINISTRY OF HEALTH<br>
-                            NATIONAL PUBLIC HEALTH LABORATORY<br>
-                            KENYA EXTERNAL QUALITY ASSESSMENT SCHEME (KNEQAS)<br>
-                            HIV MOLECULAR - VL PROFICIENCY TESTING<br></strong>
+                                <img src="/images/country/moh-logo.png" width="120px"><br>
+                                MINISTRY OF HEALTH<br>
+                                NATIONAL PUBLIC HEALTH LABORATORY<br>
+                                KENYA EXTERNAL QUALITY ASSESSMENT SCHEME (KNEQAS)<br>
+                                HIV MOLECULAR - VL PROFICIENCY TESTING<br></strong>
                             P.O Box 20750 - 00202 NAIROBI Email: nphlpt@nphl.go.ke Help Desk: helpdesk.nphl.go.ke<br>
                         </center>
                         <strong>
@@ -37,11 +37,17 @@
                     <table class="table table-bordered table-striped" style="width:100%;margin:10px auto;">
                         <tr>
                             <td>
-                                <h4><strong>Lab Code</strong></h4> <?php echo ( $this->participant['MflCode'] ); ?>
+                                <h4><strong>Lab Code</strong></h4> <?php echo ($this->participant['MflCode']); ?>
                             </td>
-                            <td><h4><strong>Lab Name</strong></h4> <?php echo ( $this->participant['institute_name'] ); ?> </td>
-                            <td><h4><strong>Phone No</strong></h4> <?php echo ( $this->participant['phone'] ); ?></td>
-                            <td><h4><strong>Platform</strong></h4> <?php echo ( $this->platform['PlatformName'] ); ?></td>
+                            <td>
+                                <h4><strong>Lab Name</strong></h4> <?php echo ($this->participant['institute_name']); ?>
+                            </td>
+                            <td>
+                                <h4><strong>Phone No</strong></h4> <?php echo ($this->participant['phone']); ?>
+                            </td>
+                            <td>
+                                <h4><strong>Platform</strong></h4> <?php echo ($this->platform['PlatformName']); ?>
+                            </td>
                         </tr>
                     </table>
 
@@ -53,19 +59,19 @@
                             <td><?php echo $this->dateFormat($this->shipment['lastdate_response']); ?> </td>
                         </tr>
 
-                        <tr class ="light">
+                        <tr class="light">
                             <td><label>Specimen Receipt Date</label></td>
                             <td>
                                 <?php echo $this->dateFormat($this->shipment["shipment_receipt_date"]); ?>
                             </td>
-                            <td><label>Testing Date</label></td> 
+                            <td><label>Testing Date</label></td>
                             <td>
                                 <?php echo $this->dateFormat($this->shipment["shipment_test_date"]); ?>
-                            </td>       
+                            </td>
                         </tr>
                         <tr>
 
-                            <td><label>Specimen Volume used for testing</label></td> 
+                            <td><label>Specimen Volume used for testing</label></td>
                             <td>
                                 <?php echo $this->shipment['attributes']['specimen_volume']; ?>
                             </td>
@@ -75,27 +81,29 @@
                             </td>
                         </tr>
 
-                        <tr class ="dark">
+                        <tr class="dark">
                             <td><label>Kit Lot Number</label></td>
                             <td>
-                                <?php echo isset($this->shipment['attributes']['assay_lot_number'])?$this->shipment['attributes']['assay_lot_number']:''; ?>
+                                <?php echo isset($this->shipment['attributes']['assay_lot_number']) ? $this->shipment['attributes']['assay_lot_number'] : ''; ?>
                             </td>
                             <td><label>Kit Expiration Date </label></td>
                             <td>
-                                <?php echo isset($this->shipment['attributes']['assay_expiration_date'])?$this->dateFormat($this->shipment['attributes']['assay_expiration_date']):''; ?>
+                                <?php echo isset($this->shipment['attributes']['assay_expiration_date']) ? $this->dateFormat($this->shipment['attributes']['assay_expiration_date']) : ''; ?>
                             </td>
                         </tr>
                     </table>
 
                     <table class="table table-bordered table-striped" style="width:100%;margin:10px auto;">
                         <thead class="vlResultSection" style="<?php echo (isset($this->shipment['is_pt_test_not_performed']) && $this->shipment['is_pt_test_not_performed'] == 'yes') ? 'display:none;' : ''; ?>">
-                            <tr align="center" class="" >
+                            <tr align="center" class="">
                                 <th style="width:35%;text-align: left;">Sample</th>
-                                <th>Results (log<sub>10</sub> copies/ml)</th>        
-                                <th style="display: none;">Reference Result</th>       
-                                <th>Z-Score</th>       
-                                <th>Score</th>       
-                                <th>Performance</th>       
+                                <th>Results (log<sub>10</sub> copies/ml)</th>
+                                <th>Std. Dev.</th>
+                                <th>Mean/Average</th>
+                                <th style="display: none;">Reference Result</th>
+                                <th>Z-Score</th>
+                                <th>Score</th>
+                                <th>Performance</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -111,10 +119,22 @@
 
                                 <tr class="light vlResultSection" style="<?php echo (isset($this->shipment['is_pt_test_not_performed']) && $this->shipment['is_pt_test_not_performed'] == 'yes') ? 'display:none;' : ''; ?>">
                                     <td style="padding-left: 20px;">
-                                        <?php echo $sample['sample_label']; ?>
+                                        <?php echo $sample['sample_label']; ?> &nbsp;
+                                        <!-- <?php echo " (" . json_encode($this->performanceStats[$sample['sample_id']]) . ")"; ?> -->
+
                                     </td>
                                     <td style="text-align:center;">
                                         <?php echo $sample['reported_viral_load']; ?>
+                                    </td>
+                                    <td style="text-align:center;">
+                                        <?php
+                                            echo $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
+                                        ?>
+                                    </td>
+                                    <td style="text-align:center;">
+                                        <?php
+                                            echo number_format($this->performanceStats[$sample['sample_id']]['average_rvl'],3);
+                                        ?>
                                     </td>
                                     <td style="text-align:center; display: none;">
                                         <?php echo $this->performanceStats[$sample['sample_id']]['reference_result']; ?>
@@ -122,20 +142,47 @@
                                     <td style="text-align:center;">
                                         <?php
                                         $zscore = 0.00;
-                                        if($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0){
-                                        $zscore = round(abs(round($sample['reported_viral_load'],1)-$this->performanceStats[$sample['sample_id']]['reference_result'])/$this->performanceStats[$sample['sample_id']]['sdev_rvl'],1);
+                                        $zscore2 = 0.00;
+                                        $entry = $sample['reported_viral_load'];
+                                        $sdev = $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
+                                        $mean = $this->performanceStats[$sample['sample_id']]['average_rvl'];
+                                        if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
+                                            $zscore = round(abs(round($sample['reported_viral_load'], 1) - $this->performanceStats[$sample['sample_id']]['average_rvl']) / $this->performanceStats[$sample['sample_id']]['sdev_rvl'], 1);
+
+                                            $zscore2 = ($entry - $mean) / $sdev;
                                         }
-                                        echo number_format($zscore,1);
+                                        // echo number_format($zscore, 1);
+                                        // echo $sample['calculated_score'];
+                                        echo number_format($zscore2, 3);
                                         ?>
                                     </td>
                                     <td style="text-align:center;">
-                                        <?php echo round($sample['calculated_score']*100); ?>%
+                                        <?php
+                                        // echo round($sample['calculated_score'] * 100); 
+                                        $zscore2 = 0.00;
+                                        $entry = $sample['reported_viral_load'];
+                                        $sdev = $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
+                                        $mean = $this->performanceStats[$sample['sample_id']]['average_rvl'];
+                                        if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
+                                            $zscore2 = ($entry - $mean)/$sdev;
+                                        }
+                                        if ($zscore2 < 2) echo "100%";
+                                        if ($zscore2 >= 2 && $zscore2 < 3) echo "80%";
+                                        if ($zscore2 >= 3) echo "0%";
+                                        ?>
                                     </td>
                                     <td style="text-align:center;">
-                                        <?php 
-                                            if($sample['calculated_score'] == 1)echo "ACCEPTABLE"; 
-                                            if($sample['calculated_score'] == 0.8)echo "QUESTIONABLE"; 
-                                            if($sample['calculated_score'] == 0)echo "UNACCEPTABLE"; 
+                                        <?php
+                                        $zscore2 = 0.00;
+                                        $entry = $sample['reported_viral_load'];
+                                        $sdev = $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
+                                        $mean = $this->performanceStats[$sample['sample_id']]['average_rvl'];
+                                        if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
+                                            $zscore2 = ($entry - $mean) / $sdev;
+                                        }
+                                        if ($zscore2 < 2) echo "ACCEPTABLE";
+                                        if ($zscore2 >= 2 && $zscore2 < 3) echo "QUESTIONABLE";
+                                        if ($zscore2 >= 3) echo "UNACCEPTABLE";
                                         ?>
                                     </td>
                                 </tr>
@@ -143,18 +190,18 @@
                             <?php } ?>
                             <tr class="ptNotPerformedSection" style="<?php echo (isset($this->shipment['is_pt_test_not_performed']) && $this->shipment['is_pt_test_not_performed'] == 'yes') ? '' : 'display:none;'; ?>background:none;">
                                 <td colspan="3">
-                                    <label>Please pick a reason</label> : 
+                                    <label>Please pick a reason</label> :
                                     <?php echo $this->shipment['vl_not_tested_reason']; ?>
                                     </select>
                                 </td>
                             </tr>
                             <tr class="ptNotPerformedSection" style="<?php echo (isset($this->shipment['is_pt_test_not_performed']) && $this->shipment['is_pt_test_not_performed'] == 'yes') ? '' : 'display:none;'; ?>background:none;">
-                                <td colspan="3"><label>Your comments</label> : 
+                                <td colspan="3"><label>Your comments</label> :
                                     <?php echo $this->shipment['pt_test_not_performed_comments']; ?>
                                 </td>
                             </tr>
                             <tr class="ptNotPerformedSection" style="<?php echo (isset($this->shipment['is_pt_test_not_performed']) && $this->shipment['is_pt_test_not_performed'] == 'yes') ? '' : 'display:none;'; ?>background:none;">
-                                <td colspan="3"><label>Do you need any support from the PT Provider ?</label> 
+                                <td colspan="3"><label>Do you need any support from the PT Provider ?</label>
                                     <?php echo $this->shipment['pt_support_comments']; ?>
                                 </td>
                             </tr>
@@ -163,14 +210,14 @@
                     </table>
                     <div style="float: right; font-size: 1.2em; padding: 5px 20px; display: none;">
                         <strong>
-                        <?php
-                            echo round($this->shipment["shipment_score"])."% &nbsp;";
-                            if($this->shipment["final_result"] == 1){
-                                echo "Satisfactory"; 
-                            }else{
-                                echo "<span style='color:red;'>Unsatisfactory</span>"; 
+                            <?php
+                            echo round($this->shipment["shipment_score"]) . "% &nbsp;";
+                            if ($this->shipment["final_result"] == 1) {
+                                echo "Satisfactory";
+                            } else {
+                                echo "<span style='color:red;'>Unsatisfactory</span>";
                             }
-                        ?>
+                            ?>
                         </strong>
                     </div>
                     <div style="padding: 5px 20px;clear: both;">
@@ -179,14 +226,14 @@
                             <li> &lt; 2 - Satisfactory</li>
                             <li> &gt; 2 and &lt; 3 - Questionable</li>
                             <li> &gt; 3 - Unsatisfactory</li>
-                        </ul> 
+                        </ul>
                     </div>
                 </div>
                 <br />
                 <br />
                 <br />
                 <div style="margin: 0px auto 0px auto; text-align: center; float: right;">
-                    <a href="javascript:void(0)" class="btn btn-primary" onclick="javascript:window.history.back()" >
+                    <a href="javascript:void(0)" class="btn btn-primary" onclick="javascript:window.history.back()">
                         Back
                     </a>
                 </div>
@@ -196,11 +243,13 @@
 </section>
 <script type="text/javascript">
     function getPDFReport() {
-        $.post("<?php echo $this->url(array('module' => 'admin', 'controller' => 'participants', 'action' => 'individual-performance-report'), 'default', true); ?>",
-            {mid: "<?php echo $this->mid; ?>", format: "ajax"},
-                    function (data) {
-                        console.log(data);
-                  });
+        $.post("<?php echo $this->url(array('module' => 'admin', 'controller' => 'participants', 'action' => 'individual-performance-report'), 'default', true); ?>", {
+                mid: "<?php echo $this->mid; ?>",
+                format: "ajax"
+            },
+            function(data) {
+                console.log(data);
+            });
 
     }
-</script>   
+</script>
