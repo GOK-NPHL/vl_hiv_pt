@@ -43,7 +43,7 @@ class Admin_PlatformCategoriesController extends Zend_Controller_Action
             $this->view->platform = $platform;
             $assaysModel = new Application_Model_DbTable_Assay();
             $this->view->assays = $assaysModel->getAssays();
-            $this->view->myAssays = $platform->findManyToManyRowset('Application_Model_DbTable_Assay', 'Application_Model_DbTable_AssayPlatformCategory')->toArray();
+            // $this->view->myAssays = $platform->findManyToManyRowset('Application_Model_DbTable_Assay', 'Application_Model_DbTable_AssayPlatform')->toArray();
         }else{
             $this->_redirect("/admin/platformcategories");
         }

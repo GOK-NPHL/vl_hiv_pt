@@ -5,8 +5,10 @@ class Application_Model_DbTable_Platforms extends Zend_Db_Table_Abstract
 
     protected $_name = 'platforms';
 
-    protected $_dependentTables = array('Application_Model_DbTable_ReadinessChecklistParticipantPlatform',
-        'Application_Model_DbTable_AssayPlatform');
+    protected $_dependentTables = array(
+        'Application_Model_DbTable_ReadinessChecklistParticipantPlatform',
+        'Application_Model_DbTable_AssayPlatform'
+    );
 
     public function getAllPlatforms()
     {
@@ -21,7 +23,7 @@ class Application_Model_DbTable_Platforms extends Zend_Db_Table_Abstract
          * you want to insert a non-database field (for example a counter or static image)
          */
 
-        $aColumns = array('PlatformName', 'status');
+        $aColumns = array('PlatformName', 'Category', 'status');
         $orderColumns = array('PlatformName', 'sort_order', 'status');
 
         /* Indexed column (used for fast and accurate table cardinality) */
@@ -145,13 +147,31 @@ class Application_Model_DbTable_Platforms extends Zend_Db_Table_Abstract
 
             $row = array();
             $row[] = ucwords($aRow['PlatformName']);
-
-            // $row[] = $aRow['status'] == 1 ? "Active" : "Inactive";
+            
+            // get category name
+            if ($aRow['Category'] != null) {
+                $categoryDb = new Application_Model_DbTable_PlatformCategories();
+                $category = $categoryDb->getPlatformCategoryDetails($aRow['Category']);
+                if ($category) {
+                    $row[] = ucwords($category['CategoryName']);
+                } else {
+                    $row[] = '-';
+                }
+            } else {
+                $row[] = '~';
+            }
+            
             $row[] = $aRow['status'] == 1 ? "Active" : "Inactive";
+            
             $url = '<a href="/admin/platforms/edit/id/' . $aRow['ID'] . '" class="btn btn-warning btn-xs" style="margin-right: 2px;"><i class="icon-pencil"></i> Edit</a>';
-            $url .= '<a href="/admin/platforms/delete/id/' . $aRow['ID'] . '" class="btn btn-danger btn-xs" style="margin-right: 2px;"><i class="icon-remove"></i> delete</a>';
+            $url .= '<a href="/admin/platforms/delete/id/' . $aRow['ID'] . '" class="btn btn-danger btn-xs" style="margin-right: 2px;"><i class="icon-remove"></i> Delete</a>';
+
             $row[] = $url;
+            
+            // $row[] = json_encode($aRow);
+
             $output['aaData'][] = $row;
+            // $row[] = $aRow['status'] == 1 ? "Active" : "Inactive";
         }
 
         echo json_encode($output);
@@ -163,7 +183,9 @@ class Application_Model_DbTable_Platforms extends Zend_Db_Table_Abstract
         $authNameSpace = new Zend_Session_Namespace('administrators');
         $data = array(
             'PlatformName' => $params['PlatformName'],
-            'status' => $params['status']);
+            'status' => $params['status'],
+            'Category' => $params['Category'],
+        );
         return $this->insert($data);
     }
 
@@ -172,7 +194,8 @@ class Application_Model_DbTable_Platforms extends Zend_Db_Table_Abstract
         $authNameSpace = new Zend_Session_Namespace('administrators');
         $data = array(
             'PlatformName' => $params['PlatformName'],
-            'status' => $params['status']
+            'status' => $params['status'],
+            'Category' => $params['Category'],
         );
         $platform = $this->update($data, "ID=" . $params['ID']);
         $this->getAdapter()->delete("assay_platform", "platform_id = {$params['ID']}");
@@ -189,7 +212,6 @@ class Application_Model_DbTable_Platforms extends Zend_Db_Table_Abstract
     }
     public function deletePlatformDetails($adminId)
     {
-        return $this->delete("ID =  ".$adminId);
+        return $this->delete("ID =  " . $adminId);
     }
 }
-

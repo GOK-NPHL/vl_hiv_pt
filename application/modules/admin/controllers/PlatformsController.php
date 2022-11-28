@@ -27,7 +27,9 @@ class Admin_PlatformsController extends Zend_Controller_Action
             $this->_redirect("/admin/platforms");
         }
         $assaysModel = new Application_Model_DbTable_Assay();
+        $categoriesModel = new Application_Model_DbTable_PlatformCategories();
         $this->view->assays = $assaysModel->getAssays();
+        $this->view->categories = $categoriesModel->getAllPlatformCategories();
     }
     
     public function editAction(){
@@ -44,6 +46,8 @@ class Admin_PlatformsController extends Zend_Controller_Action
             $assaysModel = new Application_Model_DbTable_Assay();
             $this->view->assays = $assaysModel->getAssays();
             $this->view->myAssays = $platform->findManyToManyRowset('Application_Model_DbTable_Assay', 'Application_Model_DbTable_AssayPlatform')->toArray();
+            $categoriesModel = new Application_Model_DbTable_PlatformCategories();
+            $this->view->categories = $categoriesModel->getAllPlatformCategories();
         }else{
             $this->_redirect("/admin/platforms");
         }

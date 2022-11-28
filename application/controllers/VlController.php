@@ -87,6 +87,10 @@ class VlController extends Zend_Controller_Action
             $this->view->participantId = $pID;
             $this->view->eID = $eID;
             $this->view->platformID = $platformID;
+
+			// categories
+			$platformCatService = new Application_Service_PlatformCategory();
+			$this->view->equipmentCategories = $platformCatService->getPlatformCategories($platformID);
     
             $this->view->isEditable = $shipmentService->isShipmentEditable($sID,$pID);
 			

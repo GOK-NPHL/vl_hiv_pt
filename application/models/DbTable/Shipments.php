@@ -1221,6 +1221,7 @@ class Application_Model_DbTable_Shipments extends Zend_Db_Table_Abstract {
             $row[] = ($aRow['scheme_name']);
             $row[] = $aRow['shipment_code'];
             $row[] = $aRow['platform_name'];
+            $row[] = $aRow['platform_category'] ?? '-';
             $row[] = $general->humanDateFormat($aRow['RESPONSEDATE']);
 
             $getParams = '/sid/' . $aRow['shipment_id'] . '/pid/' . $aRow['participant_id'] . '/eid/' . $aRow['evaluation_status'] . '/pfid/' . $aRow['platform_id'] . '/aid/' . $aRow['assay_id']. '/mid/'. $aRow['map_id'];

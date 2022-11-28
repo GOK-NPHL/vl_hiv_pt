@@ -174,10 +174,10 @@ class Application_Model_DbTable_PlatformCategories extends Zend_Db_Table_Abstrac
             'status' => $params['status']
         );
         $platform_category = $this->update($data, "ID=" . $params['ID']);
-        $this->getAdapter()->delete("assay_platform_category", "platform_category_id = {$params['ID']}");
-        foreach ($params['assays'] as $assayID) {
-            $this->getAdapter()->insert("assay_platform_category", ["platform_category_id" => $params['ID'], "assay_id" => $assayID]);
-        }
+        // $this->getAdapter()->delete("assay_platform_category", "platform_category_id = {$params['ID']}");
+        // foreach ($params['assays'] as $assayID) {
+        //     $this->getAdapter()->insert("assay_platform_category", ["platform_category_id" => $params['ID'], "assay_id" => $assayID]);
+        // }
 
         return $platform_category;
     }

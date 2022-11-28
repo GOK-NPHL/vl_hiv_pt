@@ -1,45 +1,60 @@
 <div class="well">
-    <form name="editPlatformForm" id="editPlatformForm" method="post"
-          action="<?php echo $this->url(array("module" => "admin", "controller" => "platforms", "action" => "edit"), 'default', true) ?>"
-          class="form-horizontal bs-example" role="form" enctype="multipart/form-data"
-          onsubmit="validateNow();return false;">
+    <form name="editPlatformForm" id="editPlatformForm" method="post" action="<?php echo $this->url(array("module" => "admin", "controller" => "platforms", "action" => "edit"), 'default', true) ?>" class="form-horizontal bs-example" role="form" enctype="multipart/form-data" onsubmit="validateNow();return false;">
         <fieldset>
             <legend>Edit Platform</legend>
             <div class="form-group">
                 <label class="col-lg-3 control-label">Platform Name <span class="mandatory">*</span></label>
 
                 <div class="col-lg-5">
-                    <input id="PlatformName" name="PlatformName" class="isRequired form-control" 
-                        title="Please enter the platform name here" placeholder="Please enter the Platform name here"
-                          onblur="checkDuplicate('platforms', 'PlatformName','PlatformName','<?php echo "ID##" . $this->platform['ID']; ?>', 'The name that you entered already exist. Please try something else.');"
-                            value="<?php echo $this->platform['PlatformName']; ?>" />
+                    <input id="PlatformName" name="PlatformName" class="isRequired form-control" title="Please enter the platform name here" placeholder="Please enter the Platform name here" onblur="checkDuplicate('platforms', 'PlatformName','PlatformName','<?php echo "ID##" . $this->platform['ID']; ?>', 'The name that you entered already exist. Please try something else.');" value="<?php echo $this->platform['PlatformName']; ?>" />
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-lg-3 control-label">Assays <span class="mandatory">*</span></label>
-
+                <label class="col-lg-3 control-label">Category</label>
                 <div class="col-lg-5 ">
-                    <?php 
-                    foreach ($this->assays as $assay) {
-                    ?>
-                        <div class="form-check form-check-inline">
-                            <input type="checkbox" class="form-check-input" name="assays[]" id="<?php echo $assay->id ?>"
-                             value="<?php echo $assay->id ?>" 
-                            <?php 
-                                foreach ($this->myAssays as $xds) {
-                                    if(strcmp($assay->short_name, $xds["short_name"]) == 0){
-                                        echo "checked ";
-                                        break;
-                                    }
-                                }
+                    <div class="">
+                        <select class="form-control" name="Category" id="<?php echo $category['ID'] ?>">
+                            <option value=""> -- Select -- </option>
+                            <?php
+                            foreach ($this->categories as $category) {
                             ?>
-                            >
-                            <label class="form-check-label" for="<?php echo $assay->id ?>">
-                                <?php echo $assay->name; ?></label>
-                        </div>
-                    <?php
-                    }
-                    ?>
+                                <?php
+                                if ($category['ID'] == $this->platform['Category']) {
+                                ?>
+                                    <option value="<?php echo $category['ID'] ?>" selected>
+                                        <?php echo $category['CategoryName']; ?>
+                                    </option>
+                                <?php
+                                } else {
+                                ?>
+                                    <option value="<?php echo $category['ID'] ?>">
+                                        <?php echo $category['CategoryName']; ?>
+                                    </option>
+                                <?php
+                                } ?>
+                            <?php } ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <label class="col-lg-3 control-label">Assays <span class="mandatory">*</span></label>
+
+                    <div class="col-lg-5 ">
+                        <?php foreach ($this->assays as $assay) { ?>
+                            <div class="form-check form-check-inline">
+                                <input type="checkbox" class="form-check-input" name="assays[]" id="<?php echo $assay->id ?>" value="<?php echo $assay->id ?>" <?php foreach ($this->myAssays as $xds) {
+                                                                                                                                                                    if (strcmp($assay->short_name, $xds["short_name"]) == 0) {
+                                                                                                                                                                        echo "checked ";
+                                                                                                                                                                        break;
+                                                                                                                                                                    }
+                                                                                                                                                                } ?> />
+                                <label class="form-check-label" for="<?php echo $assay->id ?>">
+                                    <?php echo $assay->name; ?></label>
+                            </div>
+                        <?php } ?>
+                    </div>
                 </div>
             </div>
             <div class="form-group">
@@ -56,10 +71,9 @@
             </div>
 
             <div id="respond" style="margin: 0px auto 0px auto; text-align: center;" align="center">
-                <input type="hidden" id="ID" name="ID" value="<?php echo $this->platform['ID']; ?>"/>
-                <input name="submitbtn" class="btn btn-primary" type="submit" tabindex="7" value="Update"/>
-                <input class="btn btn-danger" type="button" onclick="window.location.href='/admin/platforms';"
-                       tabindex="8" value="Cancel"/>
+                <input type="hidden" id="ID" name="ID" value="<?php echo $this->platform['ID']; ?>" />
+                <input name="submitbtn" class="btn btn-primary" type="submit" tabindex="7" value="Update" />
+                <input class="btn btn-danger" type="button" onclick="window.location.href='/admin/platforms';" tabindex="8" value="Cancel" />
             </div>
         </fieldset>
     </form>
@@ -77,14 +91,13 @@
                     fnct: fnct,
                     format: "html"
                 },
-                function (data) {
+                function(data) {
                     if (data > 0) {
                         alert(msg, "err");
                         duplicated = true;
                         $("#" + obj).val("");
                         $("#" + obj).focus();
-                    }
-                    else {
+                    } else {
                         duplicated = false;
                     }
                     return duplicated;
