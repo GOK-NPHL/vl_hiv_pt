@@ -362,6 +362,11 @@ class Application_Service_Common
         $countriesDb = new Application_Model_DbTable_Platforms();
         return $countriesDb->getAllPlatforms();
     }
+    public function getPlatformCategoryList()
+    {
+        $countriesDb = new Application_Model_DbTable_PlatformCategories();
+        return $countriesDb->getAllPlatformCategories();
+    }
 
     public function getSchemesList()
     {
