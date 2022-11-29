@@ -143,29 +143,9 @@ if (isset($this->shipment["shipment_test_report_date"]) && trim($this->shipment[
                             </td>
                         </tr>
                         <tr class="dark">
-                            <td><label>Equipment Category</label></td>
+                            <td><label>Platform</label></td>
                             <td>
-                                <select class="form-control" name="equipmentCategory" id="equipmentCategory">
-                                    <option value=""> -- Select -- </option>
-                                    <?php
-                                    foreach ($this->equipmentCategories as $category) {
-                                    ?>
-                                        <?php
-                                        if ($category['ID'] == $this->shipment['attributes']['equipment_category']) {
-                                        ?>
-                                            <option value="<?php echo $category['ID'] ?>" selected>
-                                                <?php echo $category['CategoryName']; ?>
-                                            </option>
-                                        <?php
-                                        } else {
-                                        ?>
-                                            <option value="<?php echo $category['ID'] ?>">
-                                                <?php echo $category['CategoryName']; ?>
-                                            </option>
-                                        <?php
-                                        } ?>
-                                    <?php } ?>
-                                </select>
+                                <?php echo $this->platform['PlatformName']; ?>
                             </td>
                             <td><label>Equipment Serial Number <span class="mandatory">*</span></label></td>
                             <td>
