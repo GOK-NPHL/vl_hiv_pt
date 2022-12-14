@@ -1383,11 +1383,13 @@ class Application_Model_DbTable_Shipments extends Zend_Db_Table_Abstract {
             $row[] = strtoupper($aRow['scheme_type']);
             $row[] = $aRow['shipment_code'];
             $row[] = $general->humanDateFormat($aRow['shipment_date']);
+            $link = '';
             if (file_exists(UPLOAD_PATH . DIRECTORY_SEPARATOR . "reports" . DIRECTORY_SEPARATOR . $aRow['shipment_code'] . DIRECTORY_SEPARATOR . $aRow['shipment_code'] . "-summary.pdf") && $aRow['status'] == 'finalized') {
-                $row[] = '<a href="/uploads/reports/' . $aRow['shipment_code'] . '/' . $aRow['shipment_code'] . '-summary.pdf"  style="text-decoration : none;" download target="_BLANK">Download Report</a>';
+                $link .= '<a href="/uploads/reports/' . $aRow['shipment_code'] . '/' . $aRow['shipment_code'] . '-summary.pdf"  style="text-decoration : none;" download target="_BLANK">Download Report</a>';
             } else {
-                $row[] = '';
+                $link .= '';
             }
+            $row[] = $link;
             $output['aaData'][] = $row;
         }
 

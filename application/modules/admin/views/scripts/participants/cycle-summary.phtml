@@ -109,7 +109,10 @@
             
                 ?>
                     <tr>
-                        <td><?php echo $reply['lab_code']; ?></td>
+                        <td>
+                            <?php echo $reply['lab_code']; ?>
+                            <?php echo $reply['lab_name']; ?>
+                        </td>
                         <?php
                         if($oneChosen && strcmp($reply['evaluated'], "yes") == 0){
                         ?>

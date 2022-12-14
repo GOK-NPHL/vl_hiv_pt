@@ -170,6 +170,11 @@ class Application_Service_Distribution {
         $distributionDb = new Application_Model_DbTable_Distribution();
         return $distributionDb->getDistributionResponseSummary($parameters);
     }
+    public function getDistribution2Summary($parameters)
+    {
+        $distributionDb = new Application_Model_DbTable_Distribution();
+        return $distributionDb->getDistributionResponse2Summary($parameters);
+    }
 
     public function evaluate($parameters)
     {

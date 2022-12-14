@@ -150,9 +150,9 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
             $row[] = Pt_Commons_General::humanDateFormat($aRow['distribution_date']);
             $row[] = $aRow['distribution_code'];
             $row[] = '<a href="/admin/shipment/index/searchString/' . $aRow['distribution_code'] . '">' . $aRow['shipments'] . '</a>';
-            $row[] = '<span class="label label-info">'.ucwords($aRow['status']) . '</span>';
+            $row[] = '<span class="label label-info">' . ucwords($aRow['status']) . '</span>';
 
-            $viewParticipants = '<a class="btn btn-primary btn-xs" href="/admin/readiness-checklist/participants/id/'.$aRow['readiness_checklist_survey_id'].'">View Participants</a> ';
+            $viewParticipants = '<a class="btn btn-primary btn-xs" href="/admin/readiness-checklist/participants/id/' . $aRow['readiness_checklist_survey_id'] . '">View Participants</a> ';
 
             $edit = '<a class="btn btn-primary btn-xs" href="/admin/distributions/edit/d8s5_8d/' . base64_encode($aRow['distribution_id']) . '"><span><i class="icon-pencil"></i> Edit</span></a> ';
 
@@ -162,20 +162,21 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
 
             $finalize = '<a class="btn btn-danger btn-xs" href="javascript:void(0);" onclick="finalizeDistribution(\'' . base64_encode($aRow['distribution_id']) . '\')"><span>Finalize</span></a>';
 
-            if ($this->getParticipantCount($aRow['distribution_id'], 2) > 0 && 
-                $this->getShipmentCount($aRow['distribution_id']) > 0  && 
-                ($aRow['status'] == 'configured' || $aRow['status'] == 'pending')) {
+            if (
+                $this->getParticipantCount($aRow['distribution_id'], 2) > 0 &&
+                $this->getShipmentCount($aRow['distribution_id']) > 0  &&
+                ($aRow['status'] == 'configured' || $aRow['status'] == 'pending')
+            ) {
 
                 $row[] = $edit . $viewParticipants . $shipNow;
-
             } else if (isset($aRow['status']) && $aRow['status'] == 'shipped') {
 
                 if (isset($aRow['lastdate_response']) && (new DateTime($aRow['lastdate_response'])) < (new DateTime())) {
                     $row[] = $viewParticipants . $shippedEdit . $finalize;
-                }else{
+                } else {
                     $row[] = $viewParticipants . $shippedEdit;
                 }
-            }else if(isset($aRow['status']) && $aRow['status'] == 'finalized') {
+            } else if (isset($aRow['status']) && $aRow['status'] == 'finalized') {
                 $row[] = $viewParticipants;
             } else {
                 $row[] = $viewParticipants . $edit . ' ' . '<a class="btn btn-primary btn-xs" href="/admin/shipment/index/did/' . base64_encode($aRow['distribution_id']) . '"><span><i class="icon-plus"></i> Add Scheme</span></a>';
@@ -380,14 +381,16 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
         $authNameSpace = new Zend_Session_Namespace('administrators');
         $common = new Application_Service_Common();
         $db = Zend_Db_Table_Abstract::getDefaultAdapter();
-        $data = array('distribution_code' => "",
+        $data = array(
+            'distribution_code' => "",
             'distribution_date' => Pt_Commons_General::dateFormat($params['distributionDate']),
             'readiness_checklist_survey_id' => $params['readiness_checklist_survey_id'],
             'status' => 'created',
             'created_by' => $authNameSpace->admin_id,
-            'created_on' => new Zend_Db_Expr('now()'));
+            'created_on' => new Zend_Db_Expr('now()')
+        );
 
-        Pt_Commons_General::log2File("Adding new distribution:".PHP_EOL.json_encode($data));
+        Pt_Commons_General::log2File("Adding new distribution:" . PHP_EOL . json_encode($data));
 
         //get participant emails
 
@@ -397,9 +400,10 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
         $db->update('distributions', $updateInfo, "distribution_id ='" . $insertId . "' ");
     }
 
-    public function sendReadinessEmailNotification($labEmail, $readinessDate = null){
+    public function sendReadinessEmailNotification($labEmail, $readinessDate = null)
+    {
 
-        if(is_null($readinessDate))$readinessDate = date('YY-m-d');
+        if (is_null($readinessDate)) $readinessDate = date('YY-m-d');
 
         if (isset($labEmail)) {
 
@@ -413,7 +417,6 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
 
     public function shipDistribution($params)
     {
-
     }
 
     public function getDistributionDates()
@@ -430,13 +433,15 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
     {
         error_log(json_encode($params));
         $authNameSpace = new Zend_Session_Namespace('administrators');
-        $data = array('distribution_code' => $params['distributionCode'],
+        $data = array(
+            'distribution_code' => $params['distributionCode'],
             'distribution_date' => Pt_Commons_General::dateFormat($params['distributionDate']),
             'readiness_checklist_survey_id' => $params['readiness_checklist_survey_id'],
             'updated_by' => $authNameSpace->admin_id,
-            'updated_on' => new Zend_Db_Expr('now()'));
+            'updated_on' => new Zend_Db_Expr('now()')
+        );
 
-        Pt_Commons_General::log2File("Updating distribution:".PHP_EOL.json_encode($data));
+        Pt_Commons_General::log2File("Updating distribution:" . PHP_EOL . json_encode($data));
 
         return $this->update($data, "distribution_id=" . base64_decode($params['distributionId']));
     }
@@ -459,15 +464,15 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
 
             $authNameSpace = new Zend_Session_Namespace('administrators');
             $updateArray = array('status' => $status);
-            if(strcmp($status, "finalized") == 0){
+            if (strcmp($status, "finalized") == 0) {
                 $updateArray["finalized_at"] = new Zend_Db_Expr('now()');
                 $updateArray["finalized_by"] = $authNameSpace->admin_id;
-            }else{
+            } else {
                 $updateArray["updated_on"] = new Zend_Db_Expr('now()');
                 $updateArray["updated_by"] = $authNameSpace->admin_id;
             }
-            
-            Pt_Commons_General::log2File("Updating distribution status:".PHP_EOL.json_encode($updateArray));
+
+            Pt_Commons_General::log2File("Updating distribution status:" . PHP_EOL . json_encode($updateArray));
 
             return $this->update($updateArray, "distribution_id=" . $distributionId);
         } else {
@@ -628,40 +633,41 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
         return $this->fetchAll($this->select());
     }
 
-    public function getParticipantCount($distributionID, $status=-1)
+    public function getParticipantCount($distributionID, $status = -1)
     {
         $distribution = $this->find($distributionID)->current();
         $survey = $distribution->findParentRow('Application_Model_DbTable_ReadinessChecklistSurvey');
         $participants = $survey->findDependentRowset('Application_Model_DbTable_ReadinessChecklistParticipant')->toArray();
 
         $count = 0;
-        if($status == -1){
+        if ($status == -1) {
             $count = count($participants);
-        }else{
+        } else {
             foreach ($participants as $participant) {
-                if($participant['status'] == $status) $count++;
+                if ($participant['status'] == $status) $count++;
             }
         }
         return $count;
     }
 
-    public function getShipmentCount($distributionID, $status=-1)
+    public function getShipmentCount($distributionID, $status = -1)
     {
         $distribution = $this->find($distributionID)->current();
         $shipments = $distribution->findDependentRowset('Application_Model_DbTable_Shipments')->toArray();
 
         $count = 0;
-        if($status == -1){ 
+        if ($status == -1) {
             $count = count($shipments);
-        }else{
+        } else {
             foreach ($shipments as $shipment) {
-                if($shipment['status'] == $status) $count++;
+                if ($shipment['status'] == $status) $count++;
             }
         }
         return $count;
     }
 
-    public function getPerformanceStats($shipmentID){
+    public function getPerformanceStats($shipmentID)
+    {
         $output = [];
         $query = "SELECT rrv.sample_id, ref.reference_result, COUNT(*) population, AVG(ROUND(rrv.reported_viral_load,1)) average_rvl, ROUND(STDDEV_POP(rrv.reported_viral_load),1) sdev_rvl FROM shipment_participant_map spm INNER JOIN response_result_vl rrv ON spm.map_id = rrv.shipment_map_id INNER JOIN reference_result_vl ref ON spm.shipment_id = ref.shipment_id AND rrv.sample_id = ref.sample_id WHERE spm.shipment_id = $shipmentID AND ref.control = 0 AND spm.is_pt_test_not_performed IS NULL GROUP BY rrv.sample_id";
         $rResult = $this->getAdapter()->fetchAll($query);
@@ -673,7 +679,8 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
         return $output;
     }
 
-    public function getDistributionResponseSummary($parameters) {
+    public function getDistributionResponseSummary($parameters)
+    {
 
         $authNameSpace = new Zend_Session_Namespace('administrators');
         $assayID = 1; //VL=1, EID=2
@@ -687,46 +694,46 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
          */
 
         if (isset($parameters['pt_survey']) && intval($parameters['pt_survey']) > 0) {
-            $whereDistribution = "AND d.distribution_id = ". $parameters['pt_survey'];
+            $whereDistribution = "AND d.distribution_id = " . $parameters['pt_survey'];
         }
 
         if (isset($parameters['pt_platform']) && intval($parameters['pt_platform']) > 0) {
-            $wherePlatform = "AND pl.ID = ". $parameters['pt_platform'];
+            $wherePlatform = "AND pl.ID = " . $parameters['pt_platform'];
         }
 
         if (isset($parameters['pt_assay']) && intval($parameters['pt_assay']) > 0) {
             $assayID = intval($parameters['pt_assay']);
         }
 
-        $consensusVLQuery = "SELECT s.shipment_id, spm.platform_id, refvl.sample_id, s.shipment_code, pl.PlatformName, ".
-                "refvl.sample_label, ROUND(AVG(IF(ISNULL(refvl.reference_result) OR refvl.reference_result = '', rrv.reported_viral_load, refvl.reference_result)),1) reference_result, ROUND(AVG(rrv.reported_viral_load),1) consensus, ROUND(stddev_pop(rrv.reported_viral_load),1) sdevp ".
-                "FROM reference_result_vl refvl ".
-                "INNER JOIN shipment s ON refvl.shipment_id = s.shipment_id ".
-                "INNER JOIN shipment_participant_map spm ON s.shipment_id = spm.shipment_id AND spm.is_pt_test_not_performed IS NULL ".
-                "INNER JOIN response_result_vl rrv ON rrv.shipment_map_id = spm.map_id AND refvl.sample_id = rrv.sample_id ".
-                "INNER JOIN platforms pl ON spm.platform_id = pl.ID $wherePlatform ".
-                "WHERE refvl.control = 0 AND spm.assay_id = $assayID AND rrv.reported_viral_load != '' ".
-                "GROUP BY s.shipment_id, spm.platform_id, refvl.sample_id";
+        $consensusVLQuery = "SELECT s.shipment_id, spm.platform_id, refvl.sample_id, s.shipment_code, pl.PlatformName, " .
+            "refvl.sample_label, ROUND(AVG(IF(ISNULL(refvl.reference_result) OR refvl.reference_result = '', rrv.reported_viral_load, refvl.reference_result)),1) reference_result, ROUND(AVG(rrv.reported_viral_load),1) consensus, ROUND(stddev_pop(rrv.reported_viral_load),1) sdevp " .
+            "FROM reference_result_vl refvl " .
+            "INNER JOIN shipment s ON refvl.shipment_id = s.shipment_id " .
+            "INNER JOIN shipment_participant_map spm ON s.shipment_id = spm.shipment_id AND spm.is_pt_test_not_performed IS NULL " .
+            "INNER JOIN response_result_vl rrv ON rrv.shipment_map_id = spm.map_id AND refvl.sample_id = rrv.sample_id " .
+            "INNER JOIN platforms pl ON spm.platform_id = pl.ID $wherePlatform " .
+            "WHERE refvl.control = 0 AND spm.assay_id = $assayID AND rrv.reported_viral_load != '' " .
+            "GROUP BY s.shipment_id, spm.platform_id, refvl.sample_id";
 
-        $responsesVLQuery = "SELECT spm.map_id, spm.shipment_id, spm.platform_id, spm.participant_id, p.MflCode AS lab_code, ".
-                "p.institute_name, spm.report_generated, spm.shipment_score, spm.final_result, ".
-                "d.distribution_name, results.PlatformName AS platform_name, results.sample_label, results.reference_result, ".
-                "ROUND(rrv.reported_viral_load,1) reported_viral_load, results.consensus, results.sdevp, ".
-                "ROUND(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result) /results.sdevp, 1) zscore,".
-                "IF(results.sdevp > 0, IF(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result) /results.sdevp <= 2, 1, IF(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result)/results.sdevp <= 3,0.8,0)), 1) AS score ".
-                "FROM shipment_participant_map spm ".
-                "INNER JOIN shipment s ON spm.shipment_id = s.shipment_id ".
-                "INNER JOIN distributions d ON s.distribution_id = d.distribution_id $whereDistribution ".
-                "INNER JOIN participant p ON spm.participant_id = p.participant_id ".
-                "INNER JOIN ($consensusVLQuery) AS results ON spm.shipment_id = results.shipment_id ".
-                    "AND spm.platform_id = results.platform_id AND spm.assay_id = $assayID ".
-                "INNER JOIN response_result_vl rrv ON spm.map_id = rrv.shipment_map_id AND results.sample_id = rrv.sample_id ".
-                "WHERE spm.is_pt_test_not_performed IS NULL";
+        $responsesVLQuery = "SELECT spm.map_id, spm.shipment_id, spm.platform_id, spm.participant_id, p.MflCode AS lab_code, " .
+            "p.institute_name, spm.report_generated, spm.shipment_score, spm.final_result, " .
+            "d.distribution_name, results.PlatformName AS platform_name, results.sample_label, results.reference_result, " .
+            "ROUND(rrv.reported_viral_load,1) reported_viral_load, results.consensus, results.sdevp, " .
+            "ROUND(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result) /results.sdevp, 1) zscore," .
+            "IF(results.sdevp > 0, IF(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result) /results.sdevp <= 2, 1, IF(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result)/results.sdevp <= 3,0.8,0)), 1) AS score " .
+            "FROM shipment_participant_map spm " .
+            "INNER JOIN shipment s ON spm.shipment_id = s.shipment_id " .
+            "INNER JOIN distributions d ON s.distribution_id = d.distribution_id $whereDistribution " .
+            "INNER JOIN participant p ON spm.participant_id = p.participant_id " .
+            "INNER JOIN ($consensusVLQuery) AS results ON spm.shipment_id = results.shipment_id " .
+            "AND spm.platform_id = results.platform_id AND spm.assay_id = $assayID " .
+            "INNER JOIN response_result_vl rrv ON spm.map_id = rrv.shipment_map_id AND results.sample_id = rrv.sample_id " .
+            "WHERE spm.is_pt_test_not_performed IS NULL";
 
 
-        $sQuery = "SELECT x.report_generated, x.shipment_score, x.final_result, x.map_id, x.distribution_name, x.platform_name, x.lab_code, SUM(score)/COUNT(*)*100 AS pass_fail, ".
-                    "GROUP_CONCAT(IF(score=0,sample_label,NULL)) AS samples FROM".
-                    "($responsesVLQuery) AS x GROUP BY x.shipment_id, x.platform_id, x.participant_id";
+        $sQuery = "SELECT x.report_generated, x.shipment_score, x.final_result, x.map_id, x.distribution_name, x.platform_name, x.lab_code, x.institute_name as lab_name, SUM(score)/COUNT(*)*100 AS pass_fail, " .
+            "GROUP_CONCAT(IF(score=0,sample_label,NULL)) AS samples FROM" .
+            "($responsesVLQuery) AS x GROUP BY x.shipment_id, x.platform_id, x.participant_id";
         $assay = "Viral Load";
 
         $rResult = $this->getAdapter()->fetchAll($sQuery);
@@ -754,8 +761,9 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
             $row['distribution_name'] = $aRow['distribution_name'];
             $row['platform_name'] = $aRow['platform_name'];
             $row['lab_code'] = $aRow['lab_code'];
+            $row['lab_name'] = $aRow['lab_name'];
             $row['pass_fail'] = round($aRow['pass_fail'], 2);
-            $row['score'] = $aRow['pass_fail']>=$passMark?"Acceptable":"Unacceptable";
+            $row['score'] = $aRow['pass_fail'] >= $passMark ? "Acceptable" : "Unacceptable";
             $row['samples'] = $aRow['samples'];
             $row['assay_name'] = $assay;
 
@@ -768,7 +776,189 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
         return $output;
     }
 
-    public function evaluate($parameters) {
+    public function getDistributionResponse2Summary($parameters)
+    {
+        /*
+            $authNameSpace = new Zend_Session_Namespace('administrators');
+            $assayID = 1; //VL=1, EID=2
+            $assay = "";
+            $whereDistribution = "";
+            $wherePlatform = "";
+
+            /-*
+            * SQL queries
+            * Get data to display
+            *-/
+
+            if (isset($parameters['pt_survey']) && intval($parameters['pt_survey']) > 0) {
+                $whereDistribution = "AND d.distribution_id = ". $parameters['pt_survey'];
+            }
+
+            if (isset($parameters['pt_platform']) && intval($parameters['pt_platform']) > 0) {
+                $wherePlatform = "AND pl.ID = ". $parameters['pt_platform'];
+            }
+
+            if (isset($parameters['pt_assay']) && intval($parameters['pt_assay']) > 0) {
+                $assayID = intval($parameters['pt_assay']);
+            }
+
+            $consensusVLQuery = "SELECT s.shipment_id, spm.platform_id, refvl.sample_id, s.shipment_code, pl.PlatformName, ".
+                    "refvl.sample_label, ROUND(AVG(IF(ISNULL(refvl.reference_result) OR refvl.reference_result = '', rrv.reported_viral_load, refvl.reference_result)),1) reference_result, ROUND(AVG(rrv.reported_viral_load),1) consensus, ROUND(stddev_pop(rrv.reported_viral_load),1) sdevp ".
+                    "FROM reference_result_vl refvl ".
+                    "INNER JOIN shipment s ON refvl.shipment_id = s.shipment_id ".
+                    "INNER JOIN shipment_participant_map spm ON s.shipment_id = spm.shipment_id AND spm.is_pt_test_not_performed IS NULL ".
+                    "INNER JOIN response_result_vl rrv ON rrv.shipment_map_id = spm.map_id AND refvl.sample_id = rrv.sample_id ".
+                    "INNER JOIN platforms pl ON spm.platform_id = pl.ID $wherePlatform ".
+                    "WHERE refvl.control = 0 AND spm.assay_id = $assayID AND rrv.reported_viral_load != '' ".
+                    "GROUP BY s.shipment_id, spm.platform_id, refvl.sample_id";
+
+            $responsesVLQuery = "SELECT spm.map_id, spm.shipment_id, spm.platform_id, spm.participant_id, p.MflCode AS lab_code, ".
+                    "p.institute_name, spm.report_generated, spm.shipment_score, spm.final_result, ".
+                    "d.distribution_name, results.PlatformName AS platform_name, results.sample_label, results.reference_result, ".
+                    "ROUND(rrv.reported_viral_load,1) reported_viral_load, results.consensus, results.sdevp, ".
+                    "ROUND(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result) /results.sdevp, 1) zscore,".
+                    "IF(results.sdevp > 0, IF(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result) /results.sdevp <= 2, 1, IF(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result)/results.sdevp <= 3,0.8,0)), 1) AS score ".
+                    "FROM shipment_participant_map spm ".
+                    "INNER JOIN shipment s ON spm.shipment_id = s.shipment_id ".
+                    "INNER JOIN distributions d ON s.distribution_id = d.distribution_id $whereDistribution ".
+                    "INNER JOIN participant p ON spm.participant_id = p.participant_id ".
+                    "INNER JOIN ($consensusVLQuery) AS results ON spm.shipment_id = results.shipment_id ".
+                        "AND spm.platform_id = results.platform_id AND spm.assay_id = $assayID ".
+                    "INNER JOIN response_result_vl rrv ON spm.map_id = rrv.shipment_map_id AND results.sample_id = rrv.sample_id ".
+                    "WHERE spm.is_pt_test_not_performed IS NULL";
+
+
+            $sQuery = "SELECT x.report_generated, x.shipment_score, x.final_result, x.map_id, x.distribution_name, x.platform_name, x.lab_code, x.institute_name as lab_name, SUM(score)/COUNT(*)*100 AS pass_fail, ".
+                        "GROUP_CONCAT(IF(score=0,sample_label,NULL)) AS samples FROM".
+                        "($responsesVLQuery) AS x GROUP BY x.shipment_id, x.platform_id, x.participant_id";
+            $assay = "Viral Load";
+
+            $rResult = $this->getAdapter()->fetchAll($sQuery);
+
+            /-*
+            * Output
+            *-/
+            $output = array(
+                "sEcho" => 1,
+                "iTotalRecords" => count($rResult),
+                "iTotalDisplayRecords" => count($rResult),
+                "aaData" => array(),
+                "rawResults" => array()
+            );
+
+            $passMark = 80;
+
+            foreach ($rResult as $aRow) {
+                $row = array();
+
+                $row['evaluated'] = $aRow['report_generated'];
+                $row['map_id'] = $aRow['map_id'];
+                $row['shipment_score'] = $aRow['shipment_score'];
+                $row['final_result'] = $aRow['final_result'];
+                $row['distribution_name'] = $aRow['distribution_name'];
+                $row['platform_name'] = $aRow['platform_name'];
+                $row['lab_code'] = $aRow['lab_code'];
+                $row['lab_name'] = $aRow['lab_name'];
+                $row['pass_fail'] = round($aRow['pass_fail'], 2);
+                $row['score'] = $aRow['pass_fail']>=$passMark?"Acceptable":"Unacceptable";
+                $row['samples'] = $aRow['samples'];
+                $row['assay_name'] = $assay;
+
+                $output['aaData'][] = $row;
+            }
+
+            $rResult = $this->getAdapter()->fetchAll($responsesVLQuery);
+            $output['rawResults'] = $rResult;
+            $this->evaluate($parameters);
+            return $output;
+        */
+
+        $query = "select
+            shipment.shipment_code as shipment_code,
+            shipment.shipment_id as shipment_id,
+            platform.ID as platform_id,
+            platform.PlatformName as platform_name,
+            lab.institute_name as lab_name,
+            lab.participant_id as lab_id,
+            lab.unique_identifier as lab_uid,
+            # equipment_serial,
+            ref.sample_id as sample_id,
+            ref.sample_label as sample_label,
+            result.reported_viral_load as reported_viral_load,
+            sp_map.attributes as attributes
+        from response_result_vl result
+            join reference_result_vl ref on result.sample_id = ref.sample_id
+            join shipment_participant_map sp_map on result.shipment_map_id = sp_map.map_id
+            join participant lab on sp_map.participant_id = lab.participant_id
+            join shipment on shipment.shipment_id = sp_map.shipment_id
+            join platforms platform on sp_map.platform_id = platform.ID
+        group by shipment.shipment_code, platform.ID, platform.PlatformName, lab.institute_name, ref.sample_label, result.reported_viral_load
+        ";
+        $result = $this->getAdapter()->fetchAll($query);
+
+        $labs = [];
+        $platforms = [];
+        $samples = [];
+        $shipments = [];
+        $results = [];
+
+        foreach ($result as $row) {
+            // push unique labs
+            if (!in_array(['uid' => $row['lab_uid'], 'id' => $row['lab_id'], 'name' => $row['lab_name']], $labs)) {
+                $labs[] = [
+                    'uid' => $row['lab_uid'],
+                    'id' => $row['lab_id'],
+                    'name' => $row['lab_name']
+                ];
+            }
+
+            // push unique platforms
+            if (!in_array(['id' => $row['platform_id'], 'name' => $row['platform_name']], $platforms)) {
+                $platforms[] = [
+                    'id' => $row['platform_id'],
+                    'name' => $row['platform_name']
+                ];
+            }
+
+            // push unique shipments
+            if (!in_array(['id' => $row['shipment_id'], 'code' => $row['shipment_code']], $shipments)) {
+                $shipments[] = [
+                    'id' => $row['shipment_id'],
+                    'code' => $row['shipment_code']
+                ];
+            }
+        }
+
+        $shs = [];
+        foreach ($shipments as $shipment) {
+            // get samples
+            $s_query = "SELECT 
+                ref.sample_id, ref.sample_label, ref.control as is_control, ref.mandatory as is_mandatory
+             from reference_result_vl ref
+                JOIN shipment sh on sh.shipment_id = ref.shipment_id
+                where ref.shipment_id = " . $shipment['id'];
+
+            $s_result = $this->getAdapter()->fetchAll($s_query);
+
+            $shs[] = [
+                'id' => $shipment['id'],
+                'code' => $shipment['code'],
+                'samples' => $s_result
+            ];
+        }
+
+        $output = [
+            'labs' => $labs,
+            'platforms' => $platforms,
+            'shipments' => $shs,
+            'results' => $result
+        ];
+
+        return $output;
+    }
+
+    public function evaluate($parameters)
+    {
 
         $authNameSpace = new Zend_Session_Namespace('administrators');
         $assayID = 1; //VL=1
@@ -782,64 +972,70 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
          */
 
         if (isset($parameters['pt_survey']) && intval($parameters['pt_survey']) > 0) {
-            $whereDistribution = "AND d.distribution_id = ". $parameters['pt_survey'];
+            $whereDistribution = "AND d.distribution_id = " . $parameters['pt_survey'];
         }
 
         if (isset($parameters['pt_platform']) && intval($parameters['pt_platform']) > 0) {
-            $wherePlatform = "AND pl.ID = ". $parameters['pt_platform'];
+            $wherePlatform = "AND pl.ID = " . $parameters['pt_platform'];
         }
 
         if (isset($parameters['pt_assay']) && intval($parameters['pt_assay']) > 0) {
             $assayID = intval($parameters['pt_assay']);
         }
 
-        $consensusVLQuery = "SELECT s.shipment_id, spm.platform_id, refvl.sample_id, s.shipment_code, pl.PlatformName, ".
-                "refvl.sample_label, ROUND(AVG(IF(ISNULL(refvl.reference_result) OR refvl.reference_result = '', rrv.reported_viral_load, refvl.reference_result)),1) reference_result, ROUND(AVG(rrv.reported_viral_load),1) consensus, ROUND(stddev_pop(rrv.reported_viral_load),1) sdevp ".
-                "FROM reference_result_vl refvl ".
-                "INNER JOIN shipment s ON refvl.shipment_id = s.shipment_id ".
-                "INNER JOIN shipment_participant_map spm ON s.shipment_id = spm.shipment_id AND spm.is_pt_test_not_performed IS NULL ".
-                "INNER JOIN response_result_vl rrv ON rrv.shipment_map_id = spm.map_id AND refvl.sample_id = rrv.sample_id ".
-                "INNER JOIN platforms pl ON spm.platform_id = pl.ID $wherePlatform ".
-                "WHERE refvl.control = 0 AND spm.assay_id = $assayID ".
-                "GROUP BY s.shipment_id, spm.platform_id, refvl.sample_id";
+        $consensusVLQuery = "SELECT s.shipment_id, spm.platform_id, refvl.sample_id, s.shipment_code, pl.PlatformName, " .
+            "refvl.sample_label, ROUND(AVG(IF(ISNULL(refvl.reference_result) OR refvl.reference_result = '', rrv.reported_viral_load, refvl.reference_result)),1) reference_result, ROUND(AVG(rrv.reported_viral_load),1) consensus, ROUND(stddev_pop(rrv.reported_viral_load),1) sdevp " .
+            "FROM reference_result_vl refvl " .
+            "INNER JOIN shipment s ON refvl.shipment_id = s.shipment_id " .
+            "INNER JOIN shipment_participant_map spm ON s.shipment_id = spm.shipment_id AND spm.is_pt_test_not_performed IS NULL " .
+            "INNER JOIN response_result_vl rrv ON rrv.shipment_map_id = spm.map_id AND refvl.sample_id = rrv.sample_id " .
+            "INNER JOIN platforms pl ON spm.platform_id = pl.ID $wherePlatform " .
+            "WHERE refvl.control = 0 AND spm.assay_id = $assayID " .
+            "GROUP BY s.shipment_id, spm.platform_id, refvl.sample_id";
 
-        $responsesVLQuery = "SELECT spm.map_id, results.sample_id, ".
-                "ROUND(rrv.reported_viral_load,1) reported_viral_load, results.consensus, results.sdevp, ".
-                "IF(results.sdevp > 0, IF(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result) /results.sdevp <= 2, 1, IF(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result)/results.sdevp <= 3,0.8,0)), 1) AS score ".
-                "FROM shipment_participant_map spm ".
-                "INNER JOIN shipment s ON spm.shipment_id = s.shipment_id ".
-                "INNER JOIN distributions d ON s.distribution_id = d.distribution_id $whereDistribution ".
-                "INNER JOIN participant p ON spm.participant_id = p.participant_id ".
-                "INNER JOIN ($consensusVLQuery) AS results ON spm.shipment_id = results.shipment_id ".
-                    "AND spm.platform_id = results.platform_id AND spm.assay_id = $assayID ".
-                "INNER JOIN response_result_vl rrv ON spm.map_id = rrv.shipment_map_id AND results.sample_id = rrv.sample_id ".
-                "WHERE spm.is_pt_test_not_performed IS NULL";
+        $responsesVLQuery = "SELECT spm.map_id, results.sample_id, " .
+            "ROUND(rrv.reported_viral_load,1) reported_viral_load, results.consensus, results.sdevp, " .
+            "IF(results.sdevp > 0, IF(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result) /results.sdevp <= 2, 1, IF(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result)/results.sdevp <= 3,0.8,0)), 1) AS score " .
+            "FROM shipment_participant_map spm " .
+            "INNER JOIN shipment s ON spm.shipment_id = s.shipment_id " .
+            "INNER JOIN distributions d ON s.distribution_id = d.distribution_id $whereDistribution " .
+            "INNER JOIN participant p ON spm.participant_id = p.participant_id " .
+            "INNER JOIN ($consensusVLQuery) AS results ON spm.shipment_id = results.shipment_id " .
+            "AND spm.platform_id = results.platform_id AND spm.assay_id = $assayID " .
+            "INNER JOIN response_result_vl rrv ON spm.map_id = rrv.shipment_map_id AND results.sample_id = rrv.sample_id " .
+            "WHERE spm.is_pt_test_not_performed IS NULL";
 
         $rResult = $this->getAdapter()->fetchAll($responsesVLQuery);
         $responseResultVL = new Application_Model_DbTable_ResponseVl();
         foreach ($rResult as $aRow) {
             Pt_Commons_General::log2File(
-                "Evaluation performed by ".$authNameSpace->admin_id."\n".
-                json_encode(array("calculated_score" => $aRow['score']))." WHERE ".
-                json_encode(
-                    array("shipment_map_id" => $aRow['map_id'],
-                        "sample_id" => $aRow['sample_id']))
+                "Evaluation performed by " . $authNameSpace->admin_id . "\n" .
+                    json_encode(array("calculated_score" => $aRow['score'])) . " WHERE " .
+                    json_encode(
+                        array(
+                            "shipment_map_id" => $aRow['map_id'],
+                            "sample_id" => $aRow['sample_id']
+                        )
+                    )
             );
             error_log("Updating evaluation table -> responseResultVL");
-            error_log("Evaluation performed by ".$authNameSpace->admin_id."\n".
-            json_encode(array("calculated_score" => $aRow['score']))." WHERE ".
-            json_encode(
-                array("shipment_map_id" => $aRow['map_id'],
-                    "sample_id" => $aRow['sample_id'])));
+            error_log("Evaluation performed by " . $authNameSpace->admin_id . "\n" .
+                json_encode(array("calculated_score" => $aRow['score'])) . " WHERE " .
+                json_encode(
+                    array(
+                        "shipment_map_id" => $aRow['map_id'],
+                        "sample_id" => $aRow['sample_id']
+                    )
+                ));
             $responseResultVL->update(
                 array("calculated_score" => $aRow['score']),
-                "shipment_map_id = ".$aRow['map_id']." AND sample_id = ".$aRow['sample_id']
+                "shipment_map_id = " . $aRow['map_id'] . " AND sample_id = " . $aRow['sample_id']
             );
             error_log("Updates done");
         }
 
-        $sQuery = "SELECT x.map_id, ROUND(SUM(score)/COUNT(*)*100) AS pass_fail FROM".
-                    "($responsesVLQuery) AS x GROUP BY x.map_id";
+        $sQuery = "SELECT x.map_id, ROUND(SUM(score)/COUNT(*)*100) AS pass_fail FROM" .
+            "($responsesVLQuery) AS x GROUP BY x.map_id";
 
         $passMark = 80;
 
@@ -847,19 +1043,21 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
         $rResult = $this->getAdapter()->fetchAll($sQuery);
         foreach ($rResult as $aRow) {
             Pt_Commons_General::log2File(
-                "Evaluation result: ".
-                json_encode(
-                    array(
-                        "shipment_score" => $aRow['pass_fail'],
-                        "final_result" => ($aRow['pass_fail'] >= $passMark),
-                        "report_generated" => "yes"
-                    )).
-                " WHERE " . json_encode(array("map_id" => $aRow['map_id'])));
+                "Evaluation result: " .
+                    json_encode(
+                        array(
+                            "shipment_score" => $aRow['pass_fail'],
+                            "final_result" => ($aRow['pass_fail'] >= $passMark),
+                            "report_generated" => "yes"
+                        )
+                    ) .
+                    " WHERE " . json_encode(array("map_id" => $aRow['map_id']))
+            );
 
             $shipmentPartipantMap->update(
                 array("shipment_score" => $aRow['pass_fail'], "final_result" => intval($aRow['pass_fail'] >= $passMark), "report_generated" => "yes"),
-                "map_id = ". $aRow['map_id']);
+                "map_id = " . $aRow['map_id']
+            );
         }
     }
-
 }

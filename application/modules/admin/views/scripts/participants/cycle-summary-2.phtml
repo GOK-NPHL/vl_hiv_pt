@@ -1,0 +1,304 @@
+<?php
+$oneChosen = false;
+if (isset($this->chosenSurvey) && isset($this->chosenPlatform) && isset($this->chosenAssay) && $this->chosenSurvey > 0 && $this->chosenPlatform > 0) {
+    $oneChosen = true;
+}
+?>
+
+<section class="content-header" style="display: flex; justify-content:space-between;">
+    <h4>Cycle Responses Summary 2</h4>
+    <small>
+        <table class="table table-condensed table-bordered">
+            <tr>
+                <td style="padding: 2px;">|z|≤2</td>
+                <td style="padding: 2px;">satisfactory result;</td>
+            </tr>
+            <tr>
+                <td style="padding: 2px;">2<|z|≤3 </td>
+                <td style="padding: 2px;">questionable result</td>
+            </tr>
+            <tr>
+                <td style="padding: 2px;">|z|>3</td>
+                <td style="padding: 2px;">unsatisfactory result.</td>
+            </tr>
+        </table>
+    </small>
+</section>
+<section class="content">
+
+
+    <div class="box">
+        <div class="box-body">
+            <?php if (isset($this->message)) : ?>
+                <div class="alert alert-dismissable alert-success">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                    <ul>
+                        <li><?php echo $this->message; ?></li>
+                    </ul>
+                </div>
+
+            <?php endif; ?>
+            <div class="form-inline hidden">
+                <form method="POST" action="/admin/participants/cycle-summary-2">
+                    <div class="form-group">
+                        <label class="form-label" style="margin-left: 20px;" for="pt_survey">PT Survey: </label>
+                        <select class="form-control" id="pt_survey" name="pt_survey">
+                            <option value="0"> -- All -- </option>
+                            <?php
+                            $selected = "";
+                            foreach ($this->surveys as $survey) {
+                                if ($this->chosenSurvey == $survey->distribution_id) $selected = " selected";
+                                echo "<option value='{$survey->distribution_id}' $selected>{$survey->distribution_name}</option>";
+                                $selected = "";
+                            }
+                            ?>
+                        </select>
+                        <label class="form-label" style="margin-left: 20px;">Platform: </label>
+                        <select class="form-control" id="pt_platform" name="pt_platform">
+                            <option value="0"> -- All -- </option>
+                            <?php
+                            foreach ($this->platforms as $platform) {
+                                if ($this->chosenPlatform == $platform->ID) $selected = " selected";
+                                echo "<option value='{$platform->ID}' $selected>{$platform->PlatformName}</option>";
+                                $selected = "";
+                            }
+                            ?>
+                        </select>
+                        <label class="form-label" style="margin-left: 20px;">Assay: </label>
+                        <select class="form-control" id="pt_assay" name="pt_assay">
+                            <?php
+                            foreach ($this->assays as $assay) {
+                                if ($this->chosenAssay == $assay->id) $selected = " selected";
+                                echo "<option value='{$assay->id}' $selected>{$assay->name}</option>";
+                                $selected = "";
+                            }
+                            ?>
+                        </select>
+                        <button class="btn btn-primary" id="btn_participant_responses">Go</button>
+                </form>
+            </div>
+        </div>
+
+        <?php
+        if (!empty($this->responses)) {
+            // echo "<pre>".json_encode($this->responses)."</pre>";
+        }
+        ?>
+        <?php
+        if (count($this->responses['aaData']) == 0) {
+            // echo "<p>No data found!</p>";
+        }
+        ?>
+
+        <table class="table hidden">
+            <thead>
+                <tr>
+                    <th>Shipment</th>
+                    <th>Lab name</th>
+                    <th>MFL code</th>
+                    <th>Platform</th>
+                    <th>Samples</th>
+                    <th>Expected result</th>
+                    <th>Result</th>
+                    <th>Overall score</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                foreach ($this->responses['rawResults'] as $response) {
+                    echo "<tr>";
+                    echo "<td>{$response['distribution_name']}</td>";
+                    echo "<td>{$response['institute_name']}</td>";
+                    echo "<td>{$response['lab_code']}</td>";
+                    echo "<td>{$response['platform_name']}</td>";
+                    echo "<td>{$response['sample_label']}</td>";
+                    echo "<td>Expected: {$response['reference_result']}, Consensus: {$response['consensus']}</td>";
+                    echo "<td>{$response['reported_viral_load']}</td>";
+                    echo "<td>Score: {$response['score']}, Z-Score: {$response['zscore']}</td>";
+                    echo "</tr>";
+                }
+                ?>
+            </tbody>
+        </table>
+
+    </div>
+    </div>
+
+    <div class="row" id="summary_container">
+    </div>
+</section>
+<script>
+    // data from php
+    var data_ = <?php echo json_encode($this->responses); ?>;
+    var data = data_;
+    data_?.results.forEach((result, x) => {
+        var r = JSON.parse(result?.attributes) || {};
+        data.results[x].attributes = r;
+    });
+    var summary_html = '';
+
+    data?.shipments.forEach((shipment, sh_x) => {
+        var shipment_data = data?.results.filter(r => r.shipment_id == shipment.id)
+
+        // add shipment container
+        summary_html += '<div class="col-md-12" style="margin-bottom: 30px; border: 1px solid #dcdbdd; border-radius: 5px; background: azure;">';
+        summary_html += '<h3 style="margin-bottom: 10px; margin-top: 30px;">Shipment: ' + shipment.code + '</h3>';
+        summary_html += '<hr/>';
+        // platform
+        data?.platforms.forEach((platform, pl_x) => {
+            var platform_data = shipment_data.filter(r => r.platform_id == platform.id)
+            // calculate the mean and sd for each sample
+            shipment.samples.forEach((sample, sa_x) => {
+                var sample_mean = 0;
+                var sample_sd = 0;
+                var sample_count = 0;
+                var sample_results = [];
+                data?.results.forEach((result, re_x) => {
+                    if (result.shipment_id == shipment.id && result.platform_id == platform.id && result.sample_id == sample.sample_id) {
+                        sample_results.push(result);
+                        sample_mean += (parseFloat(result.reported_viral_load) || 0);
+                        sample_count++;
+                    }
+                });
+                if (sample_mean > 0) sample_mean = sample_mean / sample_count;
+                sample_results.forEach((result, re_x) => {
+                    sample_sd += Math.pow(parseFloat(result.reported_viral_load) - sample_mean, 2) || 0;
+                });
+                if (sample_sd > 0) sample_sd = Math.sqrt(sample_sd / sample_count);
+                shipment.samples[sa_x].mean = sample_mean.toFixed(3);
+                shipment.samples[sa_x].sd = sample_sd.toFixed(3);
+            });
+
+            // check if there is data for this platform and shipment
+            if (platform_data.length > 0) {
+                summary_html += '<details open style="margin-bottom: 20px;">';
+                summary_html += '<summary>';
+                summary_html += '<h4 style="margin-bottom: 10px;">Platform: ' + platform.name + '</h4>';
+                summary_html += '</summary>';
+
+                //labs
+                summary_html += ' <div class="table-responsive">';
+                summary_html += ' <table class="table table-bordered">';
+                summary_html += '<thead>';
+                summary_html += '<tr>';
+                summary_html += '<th>Laboratory\/Participant</th>';
+                shipment?.samples.forEach((sample, sa_x) => {
+                    summary_html += '<th>' + sample.sample_label +
+                        '</th>';
+                });
+                summary_html += '<th>Overall score</th>';
+                summary_html += '<th>Overall performance</th>';
+                summary_html += '</tr>';
+                summary_html += '</thead>';
+                summary_html += '<tbody>';
+
+                data?.labs.forEach((lab, la_x) => {
+                    var lab_data = platform_data.filter(r => r.lab_id == lab.id)
+                    // check if there is data for this lab and platform and shipment
+                    if (lab_data.length > 0) {
+                        summary_html += '<tr>';
+                        summary_html += '<td><b>' + lab.name + ' (' + platform.name + ')';
+                        // if the attributes include an equipment_serial_number, add it to the lab name
+                        if (lab.attributes) {
+                            var attributes = JSON.parse(lab.attributes);
+                            if (attributes?.equipment_serial_no) {
+                                summary_html += ' (' + attributes.equipment_serial_no + ')';
+                            }
+                        }
+                        summary_html += '</b></td>';
+                        var lab_score = 0;
+                        var lab_perf = '<span class="label label-danger" style="font-size: 0.9em; ">Unsatisfactory</span>';
+                        shipment?.samples.forEach((sample, sa_x) => {
+                            var sample_data = lab_data.filter(r => r.sample_id == sample.sample_id)
+                            // console.log("sample=", sample.sample_id, " data=", sample_data);
+                            if (sample_data[0]) {
+                                // score = (result-mean)/sd
+                                var score = (sample_data[0].reported_viral_load - sample.mean) / sample.sd || null;
+                                lab_score += score;
+                                // Percentage:  <2 = 100%; >2<3 = 80%; >3 = 0%;
+                                var percentage_score = 0;
+                                var performance = '<span class="label label-danger" style="font-size: 0.9em; ">Unsatisfactory</span>';
+                                if(score && score != null){
+
+                                    if (score < 2) {
+                                        percentage_score = 100;
+                                    } else if (score < 3) {
+                                        percentage_score = 80;
+                                    } else {
+                                        percentage_score = 0;
+                                    }
+                                    // analysis
+                                    if (percentage_score == 100) {
+                                        performance = '<span class="label label-success" style="font-size: 0.9em; ">Satisfactory</span>';
+                                    } else if (percentage_score < 100) {
+                                        performance = '<span class="label label-warning" style="font-size: 0.9em; ">Questionable</span>';
+                                    } else if (percentage_score < 80) {
+                                        performance = '<span class="label label-danger" style="font-size: 0.9em; ">Unsatisfactory</span>';
+                                    }
+                                }
+                                
+                                console.log("score=", score, " percentage_score=", percentage_score);
+
+                                summary_html += '<td><small>'
+                                summary_html += '<span style="display: flex; align-items: center; justify-content: space-between;">' + 'Reported: <b>' + sample_data[0].reported_viral_load + '</b></span>'
+                                summary_html += '<span style="display: flex; align-items: center; justify-content: space-between;">' + 'Mean: <b>' + sample.mean + '</b></span>'
+                                summary_html += '<span style="display: flex; align-items: center; justify-content: space-between;">' + 'SD: <b>' + sample.sd + '</b></span>'
+                                summary_html += '<span style="display: flex; align-items: center; justify-content: space-between;">' + 'Z-Score: <b>' + (score ? score.toFixed(3) : '-') + '</b></span>'
+                                summary_html += '<span style="display: flex; align-items: center; justify-content: space-between;">' + 'Perf: <b>' + performance + '</b></span>'
+                                summary_html += '</small></td>';
+                            } else {
+                                summary_html += '<td> - </td>';
+                            }
+                        });
+                        lab_score = (lab_score / shipment.samples.length).toFixed(2);
+                        var lab_perc = 0;
+                        if (lab_score < 2) {
+                            lab_perc = 100;
+                        } else if (lab_score < 3) {
+                            lab_perc = 80;
+                        } else {
+                            lab_perc = 0;
+                        }
+                        if (lab_perc == 100) {
+                            lab_perf = '<span class="label label-success" style="font-size: 0.9em; ">Satisfactory</span>';
+                        } else if (lab_perc < 100) {
+                            lab_perf = '<span class="label label-warning" style="font-size: 0.9em; ">Questionable</span>';
+                        } else if (lab_perc < 80) {
+                            lab_perf = '<span class="label label-danger" style="font-size: 0.9em; ">Unsatisfactory</span>';
+                        }
+                        summary_html += '<td><b>' + lab_score + '</b></td>';
+                        summary_html += '<td>' + lab_perf + '</td>';
+                        summary_html += '</tr>';
+                    }
+                });
+                summary_html += '</tbody>';
+                summary_html += '</table>';
+                summary_html += '</div>';
+                summary_html += '</details>';
+            }
+            // else {
+            //     summary_html += '<details open style="margin-bottom: 20px;">';
+            //     summary_html += '<summary><h4 style="margin-bottom: 10px;">Platform: ' + platform.name + '</h4></summary>';
+            //     summary_html += '<div class="text-warning" style="padding: 5px; background-color: cornsilk; border-radius: 5px;">No results found for this platform.</div>';
+            //     summary_html += '</details>';
+            // }
+        })
+        summary_html += '</div>';
+    });
+
+    console.log(data);
+
+    // add to page
+    if (document.querySelector('#summary_container')) {
+        document.querySelector('#summary_container').innerHTML = summary_html;
+    } else {
+        // could not find container
+    }
+
+    document.querySelectorAll('.container').forEach(function(cont) {
+        //    cont.classList.remove('container');
+        //    cont.classList.add('container-fluid');
+        cont.style.width = '96%';
+        cont.style.maxWidth = '100%';
+    });
+</script>
