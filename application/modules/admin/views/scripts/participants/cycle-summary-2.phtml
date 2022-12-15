@@ -206,7 +206,7 @@ if (isset($this->chosenSurvey) && isset($this->chosenPlatform) && isset($this->c
                             }
                         }
                         summary_html += '</b></td>';
-                        var lab_score = 0;
+                        var lab_perc = 0;
                         var lab_perf = '<span class="label label-danger" style="font-size: 0.9em; ">Unsatisfactory</span>';
                         shipment?.samples.forEach((sample, sa_x) => {
                             var sample_data = lab_data.filter(r => r.sample_id == sample.sample_id)
@@ -214,7 +214,7 @@ if (isset($this->chosenSurvey) && isset($this->chosenPlatform) && isset($this->c
                             if (sample_data[0]) {
                                 // score = (result-mean)/sd
                                 var score = (sample_data[0].reported_viral_load - sample.mean) / sample.sd || null;
-                                lab_score += score;
+                                
                                 // Percentage:  <2 = 100%; >2<3 = 80%; >3 = 0%;
                                 var percentage_score = 0;
                                 var performance = '<span class="label label-danger" style="font-size: 0.9em; ">Unsatisfactory</span>';
@@ -236,6 +236,7 @@ if (isset($this->chosenSurvey) && isset($this->chosenPlatform) && isset($this->c
                                         performance = '<span class="label label-danger" style="font-size: 0.9em; ">Unsatisfactory</span>';
                                     }
                                 }
+                                lab_perc += percentage_score;
                                 
                                 console.log("score=", score, " percentage_score=", percentage_score);
 
@@ -250,23 +251,15 @@ if (isset($this->chosenSurvey) && isset($this->chosenPlatform) && isset($this->c
                                 summary_html += '<td> - </td>';
                             }
                         });
-                        lab_score = (lab_score / shipment.samples.length).toFixed(2);
-                        var lab_perc = 0;
-                        if (lab_score < 2) {
-                            lab_perc = 100;
-                        } else if (lab_score < 3) {
-                            lab_perc = 80;
-                        } else {
-                            lab_perc = 0;
-                        }
-                        if (lab_perc == 100) {
+                        lab_perc = (lab_perc / shipment.samples.length).toFixed(2) || 0;
+                        if (lab_perc > 80) {
                             lab_perf = '<span class="label label-success" style="font-size: 0.9em; ">Satisfactory</span>';
-                        } else if (lab_perc < 100) {
+                        } else if (lab_perc <= 80 && lab_perc != 0) {
                             lab_perf = '<span class="label label-warning" style="font-size: 0.9em; ">Questionable</span>';
-                        } else if (lab_perc < 80) {
+                        } else { // if (lab_perc < 80) {
                             lab_perf = '<span class="label label-danger" style="font-size: 0.9em; ">Unsatisfactory</span>';
                         }
-                        summary_html += '<td><b>' + lab_score + '</b></td>';
+                        summary_html += '<td><b>' + lab_perc + '</b></td>';
                         summary_html += '<td>' + lab_perf + '</td>';
                         summary_html += '</tr>';
                     }
