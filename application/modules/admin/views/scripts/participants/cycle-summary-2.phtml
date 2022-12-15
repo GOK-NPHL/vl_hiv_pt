@@ -5,6 +5,23 @@ if (isset($this->chosenSurvey) && isset($this->chosenPlatform) && isset($this->c
 }
 ?>
 
+<style>
+    .label-success {
+        color: #0f5132;
+        background-color: #9ddabe;
+    }
+
+    .label-danger {
+        color: #842029;
+        background-color: #f1aab1;
+    }
+
+    .label-warning {
+        color: #664d03;
+        background-color: #e2ce94;
+    }
+</style>
+
 <section class="content-header" style="display: flex; justify-content:space-between;">
     <h4>Cycle Responses Summary 2</h4>
     <small>
@@ -141,7 +158,7 @@ if (isset($this->chosenSurvey) && isset($this->chosenPlatform) && isset($this->c
         var shipment_data = data?.results.filter(r => r.shipment_id == shipment.id)
 
         // add shipment container
-        summary_html += '<div class="col-md-12" style="margin-bottom: 30px; border: 1px solid #dcdbdd; border-radius: 5px; background: azure;">';
+        summary_html += '<div class="col-md-12" style="margin-bottom: 30px; border: 1px solid #dcdbdd; border-radius: 5px; background: #e9f2f2;">';
         summary_html += '<h3 style="margin-bottom: 10px; margin-top: 30px;">Shipment: ' + shipment.code + '</h3>';
         summary_html += '<hr/>';
         // platform
@@ -178,13 +195,17 @@ if (isset($this->chosenSurvey) && isset($this->chosenPlatform) && isset($this->c
 
                 //labs
                 summary_html += ' <div class="table-responsive">';
-                summary_html += ' <table class="table table-bordered">';
+                summary_html += ' <table class="table table-bordered" style="border: 2px solid #acc8c8;">';
                 summary_html += '<thead>';
-                summary_html += '<tr>';
+                summary_html += '<tr style="border-bottom: 3px solid #acc8c8; background-color: #cbe6e6;">';
                 summary_html += '<th>Laboratory\/Participant</th>';
                 shipment?.samples.forEach((sample, sa_x) => {
-                    summary_html += '<th>' + sample.sample_label +
-                        '</th>';
+                    summary_html += '<th><div style="display: flex; flex-direction: column;">'
+                    summary_html += '<b>' + sample.sample_label + '</b>'
+                    summary_html += '<hr style="margin: 3px 0; border-color: #cfcacc;"/><span  style="display: flex; flex-direction: column; align-items: center; justify-content: space-between;">'
+                    summary_html += '<small style="width: 100%; display: flex; justify-content: space-between;"><span>Mean:</span><span>' + sample.mean + '</span></small>'
+                    summary_html += '<small style="width: 100%; display: flex; justify-content: space-between;"><span>SD:</span><span>' + sample.sd + '</span></small>'
+                    summary_html += '</span></div></th>';
                 });
                 summary_html += '<th>Overall score</th>';
                 summary_html += '<th>Overall performance</th>';
@@ -214,11 +235,11 @@ if (isset($this->chosenSurvey) && isset($this->chosenPlatform) && isset($this->c
                             if (sample_data[0]) {
                                 // score = (result-mean)/sd
                                 var score = (sample_data[0].reported_viral_load - sample.mean) / sample.sd || null;
-                                
+
                                 // Percentage:  <2 = 100%; >2<3 = 80%; >3 = 0%;
                                 var percentage_score = 0;
                                 var performance = '<span class="label label-danger" style="font-size: 0.9em; ">Unsatisfactory</span>';
-                                if(score && score != null){
+                                if (score && score != null) {
 
                                     if (score < 2) {
                                         percentage_score = 100;
@@ -237,13 +258,13 @@ if (isset($this->chosenSurvey) && isset($this->chosenPlatform) && isset($this->c
                                     }
                                 }
                                 lab_perc += percentage_score;
-                                
+
                                 console.log("score=", score, " percentage_score=", percentage_score);
 
                                 summary_html += '<td><small>'
                                 summary_html += '<span style="display: flex; align-items: center; justify-content: space-between;">' + 'Reported: <b>' + sample_data[0].reported_viral_load + '</b></span>'
-                                summary_html += '<span style="display: flex; align-items: center; justify-content: space-between;">' + 'Mean: <b>' + sample.mean + '</b></span>'
-                                summary_html += '<span style="display: flex; align-items: center; justify-content: space-between;">' + 'SD: <b>' + sample.sd + '</b></span>'
+                                // summary_html += '<span style="display: flex; align-items: center; justify-content: space-between;">' + 'Mean: <b>' + sample.mean + '</b></span>'
+                                // summary_html += '<span style="display: flex; align-items: center; justify-content: space-between;">' + 'SD: <b>' + sample.sd + '</b></span>'
                                 summary_html += '<span style="display: flex; align-items: center; justify-content: space-between;">' + 'Z-Score: <b>' + (score ? score.toFixed(3) : '-') + '</b></span>'
                                 summary_html += '<span style="display: flex; align-items: center; justify-content: space-between;">' + 'Perf: <b>' + performance + '</b></span>'
                                 summary_html += '</small></td>';
