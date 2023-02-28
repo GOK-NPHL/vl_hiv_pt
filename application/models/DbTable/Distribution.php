@@ -637,6 +637,7 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
     {
         $distribution = $this->find($distributionID)->current();
         $survey = $distribution->findParentRow('Application_Model_DbTable_ReadinessChecklistSurvey');
+        if ($survey == null) return 0;
         $participants = $survey->findDependentRowset('Application_Model_DbTable_ReadinessChecklistParticipant')->toArray();
 
         $count = 0;

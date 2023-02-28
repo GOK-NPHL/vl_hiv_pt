@@ -351,10 +351,11 @@ class Application_Model_DbTable_Shipments extends Zend_Db_Table_Abstract {
                 ->join(array('p' => 'participant'), 'p.participant_id=spm.participant_id', array('p.unique_identifier', 'p.first_name', 'p.last_name', 'p.institute_name'))
                 ->join(array('pmm' => 'participant_manager_map'), 'pmm.participant_id=p.participant_id')
                 ->join(array('rcp' => 'readiness_checklist_participants'), 'p.participant_id=rcp.participant_id AND d.readiness_checklist_survey_id=rcp.readiness_checklist_survey_id')
-                ->join(array('pf' => 'platforms'), 'spm.platform_id=pf.ID', array('platform_name' => 'pf.PlatformName'))
+                ->join(array('rcpl' => 'readiness_checklist_participant_platforms'), 'rcp.id=rcpl.readiness_checklist_participant_id')
+                ->join(array('pf' => 'platforms'), 'rcpl.platform_id=pf.ID', array('platform_name' => 'pf.PlatformName'))
                 ->where("pmm.dm_id=?", $this->_session->dm_id)
                 ->where("d.status='shipped'")
-                ->where("rcp.status=2") //APPROVED
+                ->where("rcp.status=2") // APPROVED
                 ->where("s.status='shipped' OR s.status='evaluated'");
 
         if (isset($parameters['currentType'])) {

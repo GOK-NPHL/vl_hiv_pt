@@ -59,7 +59,12 @@ class Admin_DistributionsController extends Zend_Controller_Action {
 
         $readinessChecklist = new Application_Model_DbTable_ReadinessChecklist();
 
+        
         foreach ($readinessChecklist->getList() as $checklist) {
+            // filter out deleted checklists
+            if ($checklist['deleted_at'] != null) {
+                continue;
+            }
             $checklists[] = $readinessChecklist->getReadinessChecklistDetails($checklist['id']);
         }
 
