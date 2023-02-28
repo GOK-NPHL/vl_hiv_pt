@@ -877,6 +877,8 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
         $query = "select
             shipment.shipment_code as shipment_code,
             shipment.shipment_id as shipment_id,
+            shipment.shipment_date,
+            shipment.lastdate_response,
             platform.ID as platform_id,
             platform.PlatformName as platform_name,
             lab.institute_name as lab_name,
@@ -893,6 +895,7 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
             join participant lab on sp_map.participant_id = lab.participant_id
             join shipment on shipment.shipment_id = sp_map.shipment_id
             join platforms platform on sp_map.platform_id = platform.ID
+        where ref.control = 0
         group by shipment.shipment_code, platform.ID, platform.PlatformName, lab.institute_name, ref.sample_label, result.reported_viral_load
         ";
         $result = $this->getAdapter()->fetchAll($query);
@@ -925,7 +928,9 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
             if (!in_array(['id' => $row['shipment_id'], 'code' => $row['shipment_code']], $shipments)) {
                 $shipments[] = [
                     'id' => $row['shipment_id'],
-                    'code' => $row['shipment_code']
+                    'code' => $row['shipment_code'],
+                    'shipment_date' => $row['shipment_date'],
+                    'shipment_lastdate' => $row['lastdate_response']
                 ];
             }
         }
@@ -937,13 +942,16 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
                 ref.sample_id, ref.sample_label, ref.control as is_control, ref.mandatory as is_mandatory
              from reference_result_vl ref
                 JOIN shipment sh on sh.shipment_id = ref.shipment_id
-                where ref.shipment_id = " . $shipment['id'];
+                where ref.control = 0
+                and ref.shipment_id = " . $shipment['id'];
 
             $s_result = $this->getAdapter()->fetchAll($s_query);
 
             $shs[] = [
                 'id' => $shipment['id'],
                 'code' => $shipment['code'],
+                'start_date' => $shipment['shipment_date'],
+                'end_date' => $shipment['shipment_lastdate'],
                 'samples' => $s_result
             ];
         }

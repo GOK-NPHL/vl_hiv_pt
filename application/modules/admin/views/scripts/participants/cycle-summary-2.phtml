@@ -159,7 +159,7 @@ if (isset($this->chosenSurvey) && isset($this->chosenPlatform) && isset($this->c
 
         // add shipment container
         summary_html += '<div class="col-md-12" style="margin-bottom: 30px; border: 1px solid #dcdbdd; border-radius: 5px; background: #e9f2f2;">';
-        summary_html += '<h3 style="margin-bottom: 10px; margin-top: 30px;">Shipment: ' + shipment.code + '</h3>';
+        summary_html += '<h3 style="margin-bottom: 10px; margin-top: 30px;">Shipment: ' + shipment.code + ((shipment?.start_date && shipment?.end_date) ? ' (' + new Date(shipment?.start_date).toLocaleDateString('en-GB')+' - '+new Date(shipment?.end_date).toLocaleDateString('en-GB') + ')' : '') + '</h3>';
         summary_html += '<hr/>';
         // platform
         data?.platforms.forEach((platform, pl_x) => {
@@ -276,7 +276,8 @@ if (isset($this->chosenSurvey) && isset($this->chosenPlatform) && isset($this->c
                         if (lab_perc > 80) {
                             lab_perf = '<span class="label label-success" style="font-size: 0.9em; ">Satisfactory</span>';
                         } else if (lab_perc <= 80 && lab_perc != 0) {
-                            lab_perf = '<span class="label label-warning" style="font-size: 0.9em; ">Questionable</span>';
+                            // lab_perf = '<span class="label label-warning" style="font-size: 0.9em; ">Questionable</span>';
+                            lab_perf = '<span class="label label-danger" style="font-size: 0.9em; ">Unsatisfactory</span>';
                         } else { // if (lab_perc < 80) {
                             lab_perf = '<span class="label label-danger" style="font-size: 0.9em; ">Unsatisfactory</span>';
                         }
