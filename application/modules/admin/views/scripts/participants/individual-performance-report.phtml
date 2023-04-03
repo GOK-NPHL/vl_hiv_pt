@@ -94,7 +94,7 @@
 	$html .= '<td>'.(isset($this->platform['PlatformName'])?$this->platform['PlatformName']:'').'</td>';
 	$html .= '<td><b>Equipment serial number</b></td>';
 	$html .= '<td>'.(isset($this->shipment['attributes']['equipment_serial_no'])?$this->dateFormat($this->shipment['attributes']['equipment_serial_no']):'').'</td>';
-	$html .= '</tr></table>';
+	$html .= '</tr>';
 
     $html .= '</td></tr><tr><td>';
 
