@@ -48,13 +48,13 @@ $html .= 'HIV MOLECULAR - VL PROFICIENCY TESTING<br></b>';
 $html .= 'P.O Box 20750 - 00202 NAIROBI Email: nphlpt@nphl.go.ke Help Desk: helpdesk.nphl.go.ke<br>';
 $html .= '</div><b style="text-align:center; width:100%;">';
 $html .= '<span style="font-size: 1.3em;display: inline-block; text-align:center; width:100%;">';
-$html .= "{$this->distribution['distribution_name']} - {$this->shipment['scheme_name']} Proficiency Testing Report</span></b>";
+$html .= "{$this->distribution['distribution_name']} - {$this->shipment['scheme_name']} Proficiency Testing Report</span> </b>";
 // $html .= "{$this->shipment['scheme_name']} Proficiency Testing Report</span></b>";
 
 $html .= '</td></tr><tr><td>';
 
 $html .= '<table style="width:100%;margin:15px auto; font-size:0.9em;">';
-$html .= '<tr><td colspan="2"><b>Lab Code</b>: ' . $this->participant['MflCode'];
+$html .= '<tr><td colspan="2"><b>Lab Code </b>: ' . $this->participant['MflCode'];
 $html .= '&nbsp; &nbsp; &nbsp; <b>Lab Name</b>: ' . $this->participant['institute_name'] . '</td>';
 $html .= '<td><b>Phone No</b>: ' . $this->participant['lab_phone'] . '</td>';
 // $html .= '<td><b>Platform</b>: '.$this->platform['PlatformName'].'</td>';
@@ -200,7 +200,7 @@ $html .= '</tbody></table>';
 $htmlx = '</td></tr><tr><td align="right">';
 
 $htmlx .= '<b style="font-size: 1.2em;">';
-$htmlx .= round($this->shipment["shipment_score"]) . "% &nbsp;";
+$htmlx .= round($this->overallScore) . "% &nbsp;";
 if ($this->shipment["final_result"] == 1) {
 	$htmlx .= 'Satisfactory';
 } else {
@@ -218,7 +218,7 @@ $html .= '</td></tr>';
 
 $html .= '<tr><td>';
 $html .= '<b style="font-size:0.9em;">Expert comment:</b> ';
-$html .= 'Thank you for participating in '.($this->shipment['code'] ?? ' the KNEQAS Viral Load PT').'. Your overall score is <b> '.($this->shipment['shipment_score'] >= 80 ? 'Satisfactory' : 'Unsatisfactory').' ('.round($this->shipment["shipment_score"]).'%)</b>. ';
+$html .= 'Thank you for participating in '.($this->shipment['code'] ?? ' the KNEQAS Viral Load PT').'. Your overall score is <b> '.($this->overallScore >= 80 ? 'Satisfactory' : 'Unsatisfactory').' ('.round($this->overallScore).'%)</b>. ';
 $html .= '</td></tr>';
 
 
@@ -255,10 +255,10 @@ if (isset($this->distribution['finalized_at']) && strlen($this->distribution['fi
 
 $html .= '</td></tr><tr><td> &nbsp;';
 $html .= '</td></tr><tr><td>';
-$html .= '<table><tr>';
-$html .= '<td>MOH/DLS/NPHL/QMS-3/KNEQAS/HIV/VL/F/02</td>';
-$html .= '<td align="center">Page 1 of 2</td>';
-$html .= '<td></td></tr></table>';
+$html .= '<table style="width:100%;"><tr>';
+$html .= '<td style="font-size:0.8em;">MOH/DLS/NPHL/QMS-3/KNEQAS/HIV/VL/F/02</td>';
+$html .= '<td style="font-size:0.8em;text-align:right;" align="center">Page 1 of 2</td>';
+$html .= '</tr></table>';
 
 $html .= '</td></tr></table></div>';
 
@@ -344,9 +344,9 @@ $html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</
 $html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
 $html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
 $html2 .= '<tr>';
-$html2 .= '<td>MOH/F/NPHL/KNEQAS/HIV/VL/02</td>';
-$html2 .= '<td align="center">Page 2 of 2</td>';
-$html2 .= '<td></td></tr></table>';
+$html2 .= '<td style="font-size:0.8em;">MOH/F/NPHL/KNEQAS/HIV/VL/02</td>';
+$html2 .= '<td style="font-size:0.8em;" align="center">Page 2 of 2</td>';
+$html2 .= '</tr></table>';
 $html2 .= '</div>';
 
 $pdf->writeHTML($html2, true, false, true, false, '');

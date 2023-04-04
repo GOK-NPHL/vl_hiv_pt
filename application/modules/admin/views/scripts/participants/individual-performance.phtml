@@ -211,7 +211,7 @@
                     <div style="float: right; font-size: 1.2em; padding: 5px 20px; display: none;">
                         <strong>
                             <?php
-                            echo round($this->shipment["shipment_score"]) . "% &nbsp;";
+                            echo round($this->overallScore) . "% &nbsp;";
                             if ($this->shipment["final_result"] == 1) {
                                 echo "Satisfactory";
                             } else {
