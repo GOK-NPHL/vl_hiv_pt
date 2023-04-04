@@ -424,6 +424,9 @@ class Admin_ParticipantsController extends Zend_Controller_Action {
         $participantService = new Application_Service_Participants();
         $this->view->participant = $participantService->getParticipantDetails($participantID);
 
+        // append lab phone number
+        $this->view->participant['lab_phone'] = $participantService->getLabPhoneNumber($participantID);
+
         $schemeService = new Application_Service_Schemes();
         $this->view->allSamples = $schemeService->getSamples($mapID);
         

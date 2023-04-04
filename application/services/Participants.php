@@ -46,6 +46,11 @@ class Application_Service_Participants
         $participantDb = new Application_Model_DbTable_Participants();
         return $participantDb->getParticipant($partSysId);
     }
+    public function getLabPhoneNumber($labSysId)
+    {
+        $participantDb = new Application_Model_DbTable_Participants();
+        return $participantDb->getLabPhoneNumber($labSysId);
+    }
 
     public function getEnrolledPlatforms($participantId)
     {

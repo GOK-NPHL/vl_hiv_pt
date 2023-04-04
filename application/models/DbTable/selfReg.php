@@ -71,6 +71,10 @@ class Application_Model_DbTable_Participants extends Zend_Db_Table_Abstract {
                     ->where("p.participant_id = ?", $partSysId)
                     ->group('p.participant_id'));
     }
+    public function getLab($partSysId) {
+        return $this->getAdapter()->fetchRow($this->getAdapter()->select()->from(array('p' => $this->_name))
+                    ->where("p.participant_id = ?", $partSysId));
+    }
 
     public function getAllParticipants($parameters) {
         /* Array of database columns which should be read and sent back to DataTables. Use a space where

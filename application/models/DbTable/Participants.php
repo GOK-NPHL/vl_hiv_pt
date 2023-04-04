@@ -91,6 +91,12 @@ class Application_Model_DbTable_Participants extends Zend_Db_Table_Abstract {
                     ->group('p.participant_id'));
     }
 
+    public function getLabPhoneNumber($partSysId) {
+        $d = $this->getAdapter()->fetchRow($this->getAdapter()->select()->from(array('p' => $this->_name))
+                    ->where("p.participant_id = ?", $partSysId));
+        return $d['phone'];
+    }
+
     public function getEnrolledPlatforms($partSysId) {
         return $this->getAdapter()->fetchAll($this->getAdapter()->select()->from(array('p' => 'facilityplatform'))
                                 ->joinLeft(array('e' => 'platforms'), 'e.ID=p.PlatformID')
