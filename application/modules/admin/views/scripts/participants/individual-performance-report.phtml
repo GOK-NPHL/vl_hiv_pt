@@ -48,8 +48,8 @@ $html .= 'HIV MOLECULAR - VL PROFICIENCY TESTING<br></b>';
 $html .= 'P.O Box 20750 - 00202 NAIROBI Email: nphlpt@nphl.go.ke Help Desk: helpdesk.nphl.go.ke<br>';
 $html .= '</div><b style="text-align:center; width:100%;">';
 $html .= '<span style="font-size: 1.3em;display: inline-block; text-align:center; width:100%;">';
-// $html .= "{$this->distribution['distribution_name']} - {$this->shipment['scheme_name']} Proficiency Testing Report</span></b>";
-$html .= "{$this->shipment['scheme_name']} Proficiency Testing Report</span></b>";
+$html .= "{$this->distribution['distribution_name']} - {$this->shipment['scheme_name']} Proficiency Testing Report</span></b>";
+// $html .= "{$this->shipment['scheme_name']} Proficiency Testing Report</span></b>";
 
 $html .= '</td></tr><tr><td>';
 
@@ -218,7 +218,7 @@ $html .= '</td></tr>';
 
 $html .= '<tr><td>';
 $html .= '<b style="font-size:0.9em;">Expert comment:</b> ';
-$html .= 'Thank you for participating in '.($this->shipment['code'] ?? ' the KNEQAS Viral Load PT').'. Your overall score is <b> '.($this->shipment['shipment_score'] > 80 ? 'Satisfactory' : ($this->shipment['shipment_score'] < 40 ? 'Unsatisfactory' : 'Questionable')).' ('.round($this->shipment["shipment_score"]).'%)</b>. ';
+$html .= 'Thank you for participating in '.($this->shipment['code'] ?? ' the KNEQAS Viral Load PT').'. Your overall score is <b> '.($this->shipment['shipment_score'] >= 80 ? 'Satisfactory' : 'Unsatisfactory').' ('.round($this->shipment["shipment_score"]).'%)</b>. ';
 $html .= '</td></tr>';
 
 
@@ -256,7 +256,7 @@ if (isset($this->distribution['finalized_at']) && strlen($this->distribution['fi
 $html .= '</td></tr><tr><td> &nbsp;';
 $html .= '</td></tr><tr><td>';
 $html .= '<table><tr>';
-$html .= '<td>MOH/F/NPHL/KNEQAS/HIV/VL/02</td>';
+$html .= '<td>MOH/DLS/NPHL/QMS-3/KNEQAS/HIV/VL/F/02</td>';
 $html .= '<td align="center">Page 1 of 2</td>';
 $html .= '<td></td></tr></table>';
 
