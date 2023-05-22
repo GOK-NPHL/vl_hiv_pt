@@ -5,7 +5,6 @@
             <a href="/admin/participants/individual-performance-report/mid/<?php echo $this->mid; ?>" target="_blank" class="btn btn-primary">Download</a>
             <a href="javascript:void(0)" class="btn btn-primary" onclick="javascript:window.history.back()">Back</a>
         </div>
-
     </h4>
 </section>
 <section class="content">
@@ -128,12 +127,12 @@
                                     </td>
                                     <td style="text-align:center;">
                                         <?php
-                                            echo $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
+                                        echo $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
                                         ?>
                                     </td>
                                     <td style="text-align:center;">
                                         <?php
-                                            echo number_format($this->performanceStats[$sample['sample_id']]['average_rvl'],3);
+                                        echo number_format($this->performanceStats[$sample['sample_id']]['average_rvl'], 3);
                                         ?>
                                     </td>
                                     <td style="text-align:center; display: none;">
@@ -164,7 +163,7 @@
                                         $sdev = $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
                                         $mean = $this->performanceStats[$sample['sample_id']]['average_rvl'];
                                         if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
-                                            $zscore2 = ($entry - $mean)/$sdev;
+                                            $zscore2 = ($entry - $mean) / $sdev;
                                         }
                                         if ($zscore2 < 2) echo "100%";
                                         if ($zscore2 >= 2 && $zscore2 < 3) echo "80%";
@@ -220,6 +219,27 @@
                             ?>
                         </strong>
                     </div>
+                    <div>
+                        <h4>Performance Summary</h4>
+                        <table class="table table-condensed table-bordered table-striped text-center">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">Enrolment</th>
+                                    <th class="text-center">Participation</th>
+                                    <th class="text-center">Satisfactory</th>
+                                    <th class="text-center">Unsatisfactory</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><?php echo $this->summaryStats['enrolled'] ?? 0; ?></td>
+                                    <td><?php echo $this->summaryStats['participated'] ?? 0; ?></td>
+                                    <td><?php echo $this->summaryStats['satisfactory'] ?? 0; ?></td>
+                                    <td><?php echo $this->summaryStats['unsatisfactory'] ?? 0; ?></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                     <div style="padding: 5px 20px;clear: both;">
                         <u>Z-Score Performance Intepretation</u>
                         <ul>
@@ -232,6 +252,7 @@
                 <br />
                 <br />
                 <br />
+
                 <div style="margin: 0px auto 0px auto; text-align: center; float: right;">
                     <a href="javascript:void(0)" class="btn btn-primary" onclick="javascript:window.history.back()">
                         Back

@@ -440,6 +440,62 @@ class Admin_ParticipantsController extends Zend_Controller_Action
         $this->view->overallScore = ($overallScore/count($allSamples))??0;
         // calculate overall score />
 
+        ///////// ----------------------------
+        ///////// ----------------------------
+        $distributionResponseSummary = $distributionDb->getDistributionResponseSummary($shipment['distribution_id']);
+        $this->view->distributionResponseSummary = $distributionResponseSummary;
+
+        // summary
+        $summary_stats = [
+            'enrolled' => 0,
+            'participated' => 0,
+            'satisfactory' => 0,
+            'unsatisfactory' => 0,
+        ];
+        if (isset($distributionResponseSummary['aaData']) && !empty($distributionResponseSummary['aaData']) && $shipmentID) {
+
+            $shipment_summary = array_filter($distributionResponseSummary['aaData'], function ($item) use ($shipmentID) {
+                return $item['shipment_id'] == $shipmentID;
+            });
+            // //enrolled
+            $summary_enrolled = array_unique(
+                array_column($shipment_summary, 'lab_code')
+            );
+            $summary_stats['enrolled'] = count($summary_enrolled);
+
+            // participated
+            $summary_participated = array_unique(
+                array_column(
+                    array_filter($shipment_summary, function ($item) {
+                        return $item['evaluated'] == 'yes';
+                    }),
+                    'lab_code'
+                )
+            );
+            $summary_stats['participated'] = count($summary_participated);
+
+
+            // for each item in the summary, aggregate the stats for each lab
+            foreach ($summary_participated as $lab_code) {
+                $lab_summary = array_filter($shipment_summary, function ($item) use ($lab_code) {
+                    return $item['lab_code'] == $lab_code;
+                });
+                $array_score = array_column($lab_summary, 'score');
+
+                // if the count of 'Acceptable' is equal to the count of the lab summary, then the lab is satisfactory
+                if (count(array_filter($array_score, function ($item) {
+                    return $item == 'Acceptable';
+                })) == count($lab_summary)) {
+                    $summary_stats['satisfactory']++;
+                } else {
+                    $summary_stats['unsatisfactory']++;
+                }
+            }
+        }
+        $this->view->summaryStats = $summary_stats ?? [];
+        ///////// ----------------------------
+        ///////// ----------------------------
+
         $this->view->mid = $mapID;
         $this->view->shipmentID = $shipmentID;
         $this->view->participantId = $participantID;
