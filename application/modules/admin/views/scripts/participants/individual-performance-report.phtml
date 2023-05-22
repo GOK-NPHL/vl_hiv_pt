@@ -1,4 +1,58 @@
 <?php
+// print_r(json_encode($this->distributionResponseSummary)); die;
+
+$shipment_id = $this->shipment['shipment_id'] ?? null;
+// summary
+$summary_stats = [
+	'enrolled' => 0,
+	'participated' => 0,
+	'satisfactory' => 0,
+	'unsatisfactory' => 0,
+];
+if (isset($this->distributionResponseSummary['aaData']) && !empty($this->distributionResponseSummary['aaData']) && $shipment_id) {
+
+	
+	$shipment_summary = array_filter($this->distributionResponseSummary['aaData'], function ($item) use ($shipment_id) {
+		return $item['shipment_id'] == $shipment_id;
+	});
+	// //enrolled
+	$summary_enrolled = array_unique(
+		array_column($shipment_summary, 'lab_code')
+	);
+	$summary_stats['enrolled'] = count($summary_enrolled);
+
+	// participated
+	$summary_participated = array_unique(
+		array_column(
+			array_filter($shipment_summary, function ($item) {
+				return $item['evaluated'] == 'yes';
+			}),
+			'lab_code'
+		)
+	);
+	$summary_stats['participated'] = count($summary_participated);
+
+
+	// for each item in the summary, aggregate the stats for each lab
+	foreach($summary_participated as $lab_code) {
+		$lab_summary = array_filter($shipment_summary, function ($item) use ($lab_code) {
+			return $item['lab_code'] == $lab_code;
+		});
+		$array_score = array_column($lab_summary, 'score');
+
+		// if the count of 'Acceptable' is equal to the count of the lab summary, then the lab is satisfactory
+		if (count(array_filter($array_score, function ($item) {
+			return $item == 'Acceptable';
+		})) == count($lab_summary)) {
+			$summary_stats['satisfactory']++;
+		} else {
+			$summary_stats['unsatisfactory']++;
+		}
+	}
+
+}
+
+
 
 require_once('tcpdf/tcpdf.php');
 
@@ -121,8 +175,8 @@ foreach ($this->allSamples as $sample) {
 	$html .= '<tr style="font-size:0.95em;' . ((isset($this->shipment['is_pt_test_not_performed']) && $this->shipment['is_pt_test_not_performed'] == 'yes') ? 'display:none;' : '') . '">';
 	$html .= '<td style="border:1px solid black;padding-left: 20px;">' . $sample['sample_label'] . '</td>';
 	$html .= '<td style="border:1px solid black;text-align:center;">' . $sample['reported_viral_load'] . '</td>';
-	$html .= '<td style="border:1px solid black;text-align:center;">' . number_format($this->performanceStats[$sample['sample_id']]['average_rvl'],3) . '</td>';
-	$html .= '<td style="border:1px solid black;text-align:center;">' . number_format($this->performanceStats[$sample['sample_id']]['sdev_rvl'],2) . '</td>';
+	$html .= '<td style="border:1px solid black;text-align:center;">' . number_format($this->performanceStats[$sample['sample_id']]['average_rvl'], 3) . '</td>';
+	$html .= '<td style="border:1px solid black;text-align:center;">' . number_format($this->performanceStats[$sample['sample_id']]['sdev_rvl'], 2) . '</td>';
 
 	$html .= '<td style="border:1px solid black;text-align:center;">';
 	// $zscore = 0.00;
@@ -218,7 +272,7 @@ $html .= '</td></tr>';
 
 $html .= '<tr><td>';
 $html .= '<b style="font-size:0.9em;">Expert comment:</b> ';
-$html .= 'Thank you for participating in '.($this->shipment['code'] ?? ' the KNEQAS Viral Load PT').'. Your overall score is <b> '.($this->overallScore >= 80 ? 'Satisfactory' : 'Unsatisfactory').' ('.round($this->overallScore).'%)</b>. ';
+$html .= 'Thank you for participating in ' . ($this->shipment['code'] ?? ' the KNEQAS Viral Load PT') . '. Your overall score is <b> ' . ($this->overallScore >= 80 ? 'Satisfactory' : 'Unsatisfactory') . ' (' . round($this->overallScore) . '%)</b>. ';
 $html .= '</td></tr>';
 
 
@@ -238,6 +292,24 @@ $html .= '<li>Subcontracted services: PT panel distribution, return of results.<
 $html .= '<li>The schemes final report with summaries of overall performance analysis are indicated below.</li>';
 $html .= '</ol>';
 $html .= '</td></tr>';
+
+
+$html .= '<tr><td>';
+$html .= '<table style="border: 1px solid #000; text-align: center;">';
+$html .= '<tr style="font-weight:bold;"> <th style="border:1px solid #000000;">Enrolment</th>  <th style="border:1px solid #000000;">Participation</th>  <th style="border:1px solid #000000;">Satisfactory</th>  <th style="border:1px solid #000000;">Unsatisfactory</th> </tr>';
+$html .= '<tr>';
+// <enrolled
+$html .= '<td style="border:1px solid #000000;">' . ($summary_stats['enrolled'] ?? 0) . '</td>';
+// <participated
+$html .= '<td style="border:1px solid #000000;">' . ($summary_stats['participated'] ?? 0) . '</td>';
+// <satisfactory
+$html .= '<td style="border:1px solid #000000;">' . ($summary_stats['satisfactory'] ?? 0) . '</td>';
+// <unsatisfactory
+$html .= '<td style="border:1px solid #000000;">' . ($summary_stats['unsatisfactory'] ?? 0) . '</td>';
+$html .= '</tr>';
+$html .= '</table>';
+$html .= '</td></tr>';
+
 
 $html .= '<tr><td>';
 if (isset($this->distribution['finalized_at']) && strlen($this->distribution['finalized_at']) > 10) {

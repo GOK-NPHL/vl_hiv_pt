@@ -688,6 +688,7 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
         $assay = "";
         $whereDistribution = "";
         $wherePlatform = "";
+        $whereShipment = "";
 
         /*
          * SQL queries
@@ -704,6 +705,10 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
 
         if (isset($parameters['pt_assay']) && intval($parameters['pt_assay']) > 0) {
             $assayID = intval($parameters['pt_assay']);
+        }
+
+        if(isset($parameters['shipment_id']) && intval($parameters['shipment_id']) == 1){
+            $whereShipment = "AND s.shipment_id = " . $parameters['shipment_id'];
         }
 
         $consensusVLQuery = "SELECT s.shipment_id, spm.platform_id, refvl.sample_id, s.shipment_code, pl.PlatformName, " .
@@ -723,7 +728,7 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
             "ROUND(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result) /results.sdevp, 1) zscore," .
             "IF(results.sdevp > 0, IF(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result) /results.sdevp <= 2, 1, IF(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result)/results.sdevp <= 3,0.8,0)), 1) AS score " .
             "FROM shipment_participant_map spm " .
-            "INNER JOIN shipment s ON spm.shipment_id = s.shipment_id " .
+            "INNER JOIN shipment s ON spm.shipment_id = s.shipment_id $whereShipment " .
             "INNER JOIN distributions d ON s.distribution_id = d.distribution_id $whereDistribution " .
             "INNER JOIN participant p ON spm.participant_id = p.participant_id " .
             "INNER JOIN ($consensusVLQuery) AS results ON spm.shipment_id = results.shipment_id " .
@@ -732,7 +737,7 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
             "WHERE spm.is_pt_test_not_performed IS NULL";
 
 
-        $sQuery = "SELECT x.report_generated, x.shipment_score, x.final_result, x.map_id, x.distribution_name, x.platform_name, x.lab_code, x.institute_name as lab_name, SUM(score)/COUNT(*)*100 AS pass_fail, " .
+        $sQuery = "SELECT x.shipment_id as ship_id, x.report_generated, x.shipment_score, x.final_result, x.map_id, x.distribution_name, x.platform_name, x.lab_code, x.institute_name as lab_name, SUM(score)/COUNT(*)*100 AS pass_fail, " .
             "GROUP_CONCAT(IF(score=0,sample_label,NULL)) AS samples FROM" .
             "($responsesVLQuery) AS x GROUP BY x.shipment_id, x.platform_id, x.participant_id";
         $assay = "Viral Load";
@@ -755,6 +760,7 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
         foreach ($rResult as $aRow) {
             $row = array();
 
+            $row['shipment_id'] = $aRow['ship_id'];
             $row['evaluated'] = $aRow['report_generated'];
             $row['map_id'] = $aRow['map_id'];
             $row['shipment_score'] = $aRow['shipment_score'];

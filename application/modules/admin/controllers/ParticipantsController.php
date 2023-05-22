@@ -485,7 +485,7 @@ class Admin_ParticipantsController extends Zend_Controller_Action
         $performanceStats = $distributionDb->getPerformanceStats($shipmentID);
         $this->view->performanceStats = $performanceStats;
 
-        $this->view->distribution = $distributionDb->getDistribution($shipment['distribution_id']);
+        $this->view->distributionResponseSummary = $distributionDb->getDistributionResponseSummary($shipment['distribution_id']);
 
         // < calculate overall score
         $overallScore = 0;
@@ -511,6 +511,9 @@ class Admin_ParticipantsController extends Zend_Controller_Action
         }
         $this->view->overallScore = ($overallScore/count($allSamples))??0;
         // calculate overall score />
+
+        // get performance summary for the shipment
+        // $this->view->performanceSummary = $distributionDb->getPerformanceSummary($shipmentID);
 
         $this->view->mid = $mapID;
         $this->view->shipmentID = $shipmentID;
