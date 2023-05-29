@@ -271,7 +271,36 @@ class ParticipantController extends Zend_Controller_Action {
         $this->view->participant = $participantService->getParticipantDetails($participantID);
 
         $schemeService = new Application_Service_Schemes();
-        $this->view->allSamples = $schemeService->getVlSamples($shipmentID, $participantID, $platformID, $assayID);
+        $allSamples = $schemeService->getVlSamples($shipmentID, $participantID, $platformID, $assayID);
+        
+        $this->view->allSamples = $allSamples;
+        $distributionDb = new Application_Model_DbTable_Distribution();
+        $performanceStats = $distributionDb->getPerformanceStats($shipmentID);
+        $this->view->performanceStats = $performanceStats;
+        // < calculate overall score
+        $overallScore = 0;
+        foreach ($allSamples as $sample) {
+            //
+            $zscore2 = 0.00;
+            $entry = $sample['reported_viral_load'];
+            $sdev = $performanceStats[$sample['sample_id']]['sdev_rvl'];
+            $mean = $performanceStats[$sample['sample_id']]['average_rvl'];
+            if ($performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
+                $zscore2 = ($entry - $mean) / $sdev;
+            }
+            if ($zscore2 < 2) {
+                $overallScore += 100;
+            }
+            if ($zscore2 >= 2 && $zscore2 < 3) {
+                $overallScore+= 80;
+            }
+            if ($zscore2 >= 3) {
+                $overallScore+= 0;
+            }
+            //
+        }
+        $this->view->overallScore = ($overallScore/count($allSamples))??0;
+        // calculate overall score />
         
         $this->view->allNotTestedReason =$schemeService->getVlNotTestedReasons();
 
