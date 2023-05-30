@@ -415,7 +415,9 @@ class Admin_ParticipantsController extends Zend_Controller_Action
         $this->view->shipment = $shipment;
 
         $platformService = new Application_Service_Platform();
-        $this->view->platform = $platformService->getPlatform($platformID);
+        $platform = $platformService->getPlatform($platformID);
+        $this->view->platform = $platform;
+        $platform_nm = $platform['PlatformName'];
 
         $distributionDb = new Application_Model_DbTable_Distribution();
         $performanceStats = $distributionDb->getPerformanceStats($shipmentID);
@@ -454,8 +456,8 @@ class Admin_ParticipantsController extends Zend_Controller_Action
         ];
         if (isset($distributionResponseSummary['aaData']) && !empty($distributionResponseSummary['aaData']) && $shipmentID) {
 
-            $shipment_summary = array_filter($distributionResponseSummary['aaData'], function ($item) use ($shipmentID) {
-                return $item['shipment_id'] == $shipmentID;
+            $shipment_summary = array_filter($distributionResponseSummary['aaData'], function ($item) use ($shipmentID, $platform_nm) {
+                return ($item['shipment_id'] == $shipmentID && $item['platform_name'] == $platform_nm);
             });
             // //enrolled
             $summary_enrolled = array_unique(

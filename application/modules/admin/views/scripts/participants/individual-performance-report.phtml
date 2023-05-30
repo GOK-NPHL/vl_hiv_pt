@@ -1,5 +1,6 @@
 <?php
-// print_r(json_encode($this->distributionResponseSummary)); die;
+
+$platform_nm = $this->platform['PlatformName'];
 
 $shipment_id = $this->shipment['shipment_id'] ?? null;
 // summary
@@ -12,8 +13,8 @@ $summary_stats = [
 if (isset($this->distributionResponseSummary['aaData']) && !empty($this->distributionResponseSummary['aaData']) && $shipment_id) {
 
 	
-	$shipment_summary = array_filter($this->distributionResponseSummary['aaData'], function ($item) use ($shipment_id) {
-		return $item['shipment_id'] == $shipment_id;
+	$shipment_summary = array_filter($this->distributionResponseSummary['aaData'], function ($item) use ($shipment_id, $platform_nm) {
+		return $item['shipment_id'] == $shipment_id && $item['platform_name'] == $platform_nm;
 	});
 	// //enrolled
 	$summary_enrolled = array_unique(
