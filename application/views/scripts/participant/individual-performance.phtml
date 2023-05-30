@@ -1,3 +1,6 @@
+<?php
+// print_r(json_encode($this->summaryStats)); die;
+?>
 <section class="content-header">
     <h4>
         <strong><?php echo "{$this->shipment['scheme_name']} - {$this->platform['PlatformName']}"; ?> Performance</strong>
@@ -125,87 +128,87 @@
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php
-                            $sampleCount = 0;
-                            $correctCount = 0;
-                            foreach ($this->allSamples as $sample) {
-                                if (isset($this->shipment['is_pt_test_not_performed']) && $this->shipment['is_pt_test_not_performed'] == 'yes') {
-                                    $sample['mandatory'] = 0;
-                                }
-                                $sampleCount++;
-                            ?>
+                                <?php
+                                $sampleCount = 0;
+                                $correctCount = 0;
+                                foreach ($this->allSamples as $sample) {
+                                    if (isset($this->shipment['is_pt_test_not_performed']) && $this->shipment['is_pt_test_not_performed'] == 'yes') {
+                                        $sample['mandatory'] = 0;
+                                    }
+                                    $sampleCount++;
+                                ?>
 
-                                <tr class="light vlResultSection" style="<?php echo (isset($this->shipment['is_pt_test_not_performed']) && $this->shipment['is_pt_test_not_performed'] == 'yes') ? 'display:none;' : ''; ?>">
-                                    <td style="padding-left: 20px;">
-                                        <?php echo $sample['sample_label']; ?> &nbsp;
-                                        <!-- <?php echo " (" . json_encode($this->performanceStats[$sample['sample_id']]) . ")"; ?> -->
+                                    <tr class="light vlResultSection" style="<?php echo (isset($this->shipment['is_pt_test_not_performed']) && $this->shipment['is_pt_test_not_performed'] == 'yes') ? 'display:none;' : ''; ?>">
+                                        <td style="padding-left: 20px;">
+                                            <?php echo $sample['sample_label']; ?> &nbsp;
+                                            <!-- <?php echo " (" . json_encode($this->performanceStats[$sample['sample_id']]) . ")"; ?> -->
 
-                                    </td>
-                                    <td style="text-align:center;">
-                                        <?php echo $sample['reported_viral_load']; ?>
-                                    </td>
-                                    <td style="text-align:center;">
-                                        <?php
-                                        echo $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
-                                        ?>
-                                    </td>
-                                    <td style="text-align:center;">
-                                        <?php
-                                        echo number_format($this->performanceStats[$sample['sample_id']]['average_rvl'], 3);
-                                        ?>
-                                    </td>
-                                    <td style="text-align:center; display: none;">
-                                        <?php echo $this->performanceStats[$sample['sample_id']]['reference_result']; ?>
-                                    </td>
-                                    <td style="text-align:center;">
-                                        <?php
-                                        $zscore = 0.00;
-                                        $zscore2 = 0.00;
-                                        $entry = $sample['reported_viral_load'];
-                                        $sdev = $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
-                                        $mean = $this->performanceStats[$sample['sample_id']]['average_rvl'];
-                                        if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
-                                            $zscore = round(abs(round($sample['reported_viral_load'], 1) - $this->performanceStats[$sample['sample_id']]['average_rvl']) / $this->performanceStats[$sample['sample_id']]['sdev_rvl'], 1);
+                                        </td>
+                                        <td style="text-align:center;">
+                                            <?php echo $sample['reported_viral_load']; ?>
+                                        </td>
+                                        <td style="text-align:center;">
+                                            <?php
+                                            echo $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
+                                            ?>
+                                        </td>
+                                        <td style="text-align:center;">
+                                            <?php
+                                            echo number_format($this->performanceStats[$sample['sample_id']]['average_rvl'], 3);
+                                            ?>
+                                        </td>
+                                        <td style="text-align:center; display: none;">
+                                            <?php echo $this->performanceStats[$sample['sample_id']]['reference_result']; ?>
+                                        </td>
+                                        <td style="text-align:center;">
+                                            <?php
+                                            $zscore = 0.00;
+                                            $zscore2 = 0.00;
+                                            $entry = $sample['reported_viral_load'];
+                                            $sdev = $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
+                                            $mean = $this->performanceStats[$sample['sample_id']]['average_rvl'];
+                                            if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
+                                                $zscore = round(abs(round($sample['reported_viral_load'], 1) - $this->performanceStats[$sample['sample_id']]['average_rvl']) / $this->performanceStats[$sample['sample_id']]['sdev_rvl'], 1);
 
-                                            $zscore2 = ($entry - $mean) / $sdev;
-                                        }
-                                        // echo number_format($zscore, 1);
-                                        // echo $sample['calculated_score'];
-                                        echo number_format($zscore2, 3);
-                                        ?>
-                                    </td>
-                                    <td style="text-align:center;">
-                                        <?php
-                                        // echo round($sample['calculated_score'] * 100); 
-                                        $zscore2 = 0.00;
-                                        $entry = $sample['reported_viral_load'];
-                                        $sdev = $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
-                                        $mean = $this->performanceStats[$sample['sample_id']]['average_rvl'];
-                                        if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
-                                            $zscore2 = ($entry - $mean) / $sdev;
-                                        }
-                                        if ($zscore2 < 2) echo "100%";
-                                        if ($zscore2 >= 2 && $zscore2 < 3) echo "80%";
-                                        if ($zscore2 >= 3) echo "0%";
-                                        ?>
-                                    </td>
-                                    <td style="text-align:center;">
-                                        <?php
-                                        $zscore2 = 0.00;
-                                        $entry = $sample['reported_viral_load'];
-                                        $sdev = $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
-                                        $mean = $this->performanceStats[$sample['sample_id']]['average_rvl'];
-                                        if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
-                                            $zscore2 = ($entry - $mean) / $sdev;
-                                        }
-                                        if ($zscore2 < 2) echo "ACCEPTABLE";
-                                        if ($zscore2 >= 2 && $zscore2 < 3) echo "QUESTIONABLE";
-                                        if ($zscore2 >= 3) echo "UNACCEPTABLE";
-                                        ?>
-                                    </td>
-                                </tr>
+                                                $zscore2 = ($entry - $mean) / $sdev;
+                                            }
+                                            // echo number_format($zscore, 1);
+                                            // echo $sample['calculated_score'];
+                                            echo number_format($zscore2, 3);
+                                            ?>
+                                        </td>
+                                        <td style="text-align:center;">
+                                            <?php
+                                            // echo round($sample['calculated_score'] * 100); 
+                                            $zscore2 = 0.00;
+                                            $entry = $sample['reported_viral_load'];
+                                            $sdev = $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
+                                            $mean = $this->performanceStats[$sample['sample_id']]['average_rvl'];
+                                            if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
+                                                $zscore2 = ($entry - $mean) / $sdev;
+                                            }
+                                            if ($zscore2 < 2) echo "100%";
+                                            if ($zscore2 >= 2 && $zscore2 < 3) echo "80%";
+                                            if ($zscore2 >= 3) echo "0%";
+                                            ?>
+                                        </td>
+                                        <td style="text-align:center;">
+                                            <?php
+                                            $zscore2 = 0.00;
+                                            $entry = $sample['reported_viral_load'];
+                                            $sdev = $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
+                                            $mean = $this->performanceStats[$sample['sample_id']]['average_rvl'];
+                                            if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
+                                                $zscore2 = ($entry - $mean) / $sdev;
+                                            }
+                                            if ($zscore2 < 2) echo "ACCEPTABLE";
+                                            if ($zscore2 >= 2 && $zscore2 < 3) echo "QUESTIONABLE";
+                                            if ($zscore2 >= 3) echo "UNACCEPTABLE";
+                                            ?>
+                                        </td>
+                                    </tr>
 
-                            <?php } ?>
+                                <?php } ?>
                                 <tr class="ptNotPerformedSection" style="<?php echo (isset($this->shipment['is_pt_test_not_performed']) && $this->shipment['is_pt_test_not_performed'] == 'yes') ? '' : 'display:none;'; ?>background:none;">
                                     <td colspan="3">
                                         <label>Please pick a reason</label> :
@@ -342,11 +345,29 @@
                                 echo "<span style='color:red;'>Unsatisfactory</span>";
                             }
                             ?>
-                            (<?php 
+                            (<?php
                                 // echo $performance / $count * 100; 
                                 echo $this->overallScore;
-                            ?> %).
+                                ?> %).
                         </strong>
+                    </div>
+                    <hr/>
+                    <div class="table-responsive table-bordered table-condensed">
+                        <h4>Performance summary</h4>
+                        <table class="table">
+                            <tr style="font-weight:bold;" class="text-center">
+                                <th style="border:1px solid #000000;">Enrolment</th>
+                                <th style="border:1px solid #000000;">Participation</th>
+                                <th style="border:1px solid #000000;">Satisfactory</th>
+                                <th style="border:1px solid #000000;">Unsatisfactory</th>
+                            </tr>
+                            <tr>
+                                <td style="border:1px solid #000000;"> <?php echo $this->summaryStats['enrolled'] ?? 0; ?></td>
+                                <td style="border:1px solid #000000;"> <?php echo $this->summaryStats['participated'] ?? 0; ?></td>
+                                <td style="border:1px solid #000000;"> <?php echo $this->summaryStats['satisfactory'] ?? 0; ?></td>
+                                <td style="border:1px solid #000000;"> <?php echo $this->summaryStats['unsatisfactory'] ?? 0; ?></td>
+                            </tr>
+                        </table>
                     </div>
                     <div class="table-responsive">
                         <table class="table">
