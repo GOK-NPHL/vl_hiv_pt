@@ -355,17 +355,25 @@
                     <div class="table-responsive table-bordered table-condensed">
                         <h4>Performance summary</h4>
                         <table class="table">
-                            <tr style="font-weight:bold;" class="text-center">
+                            <tr style="font-weight:bold; text-align: center;">
                                 <th style="border:1px solid #000000;">Enrolment</th>
                                 <th style="border:1px solid #000000;">Participation</th>
                                 <th style="border:1px solid #000000;">Satisfactory</th>
                                 <th style="border:1px solid #000000;">Unsatisfactory</th>
                             </tr>
                             <tr>
-                                <td style="border:1px solid #000000;"> <?php echo $this->summaryStats['enrolled'] ?? 0; ?></td>
-                                <td style="border:1px solid #000000;"> <?php echo $this->summaryStats['participated'] ?? 0; ?></td>
-                                <td style="border:1px solid #000000;"> <?php echo $this->summaryStats['satisfactory'] ?? 0; ?></td>
-                                <td style="border:1px solid #000000;"> <?php echo $this->summaryStats['unsatisfactory'] ?? 0; ?></td>
+                                <td style="border:1px solid #000000;"> 
+                                    <?php echo $this->summaryStats['enrolled'] ?? 0; ?>
+                                </td>
+                                <td style="border:1px solid #000000;"> 
+                                    <?php echo $this->summaryStats['participated'] ?? 0; ?>
+                                </td>
+                                <td style="border:1px solid #000000;"> 
+                                    <?php echo $this->summaryStats['satisfactory'] ?? 0; ?>
+                                </td>
+                                <td style="border:1px solid #000000;"> 
+                                    <?php echo $this->summaryStats['unsatisfactory'] ?? 0; ?>
+                                </td>
                             </tr>
                         </table>
                     </div>
