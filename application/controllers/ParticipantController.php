@@ -279,6 +279,7 @@ class ParticipantController extends Zend_Controller_Action {
         $allSamples = $schemeService->getVlSamples($shipmentID, $participantID, $platformID, $assayID);
         
         $this->view->allSamples = $allSamples;
+        $this->view->mid = $mapID;
         $distributionDb = new Application_Model_DbTable_Distribution();
         $performanceStats = $distributionDb->getPerformanceStats($shipmentID);
         $this->view->performanceStats = $performanceStats;
@@ -382,6 +383,82 @@ class ParticipantController extends Zend_Controller_Action {
         $this->view->assayID = $assayID;
         $this->view->platformID = $platformID;
     
+    }
+    
+
+    public function individualPerformanceReportAction()
+    {
+
+        $this->_helper->layout()->pageName = 'report';
+
+        $mapID = $this->getRequest()->getParam('mid');
+
+        $shipmentParticipantMapDb = new Application_Model_DbTable_ShipmentParticipantMap();
+        $spm = $shipmentParticipantMapDb->fetchRow($shipmentParticipantMapDb->select()->from('shipment_participant_map')->where("map_id=$mapID"));
+
+        $participantID = $spm['participant_id'];
+        $shipmentID = $spm['shipment_id'];
+        $assayID = $spm['assay_id'];
+        $platformID = $spm['platform_id'];
+
+        $participantService = new Application_Service_Participants();
+        $this->view->participant = $participantService->getParticipantDetails($participantID);
+
+        // append lab phone number
+        $this->view->participant['lab_phone'] = $participantService->getLabPhoneNumber($participantID);
+
+        $schemeService = new Application_Service_Schemes();
+        $allSamples = $schemeService->getSamples($mapID);
+        $this->view->allSamples = $allSamples;
+
+        $this->view->allNotTestedReason = $schemeService->getVlNotTestedReasons();
+
+        $shipment = $schemeService->getShipmentData($shipmentID, $participantID, $platformID, $assayID);
+        $shipment['attributes'] = json_decode($shipment['attributes'], true);
+        $this->view->shipment = $shipment;
+
+
+        $platformService = new Application_Service_Platform();
+        $this->view->platform = $platformService->getPlatform($platformID);
+
+        $distributionDb = new Application_Model_DbTable_Distribution();
+        $performanceStats = $distributionDb->getPerformanceStats($shipmentID);
+        $this->view->performanceStats = $performanceStats;
+
+        $this->view->distributionResponseSummary = $distributionDb->getDistributionResponseSummary($shipment['distribution_id']);
+
+        // < calculate overall score
+        $overallScore = 0;
+        foreach ($allSamples as $sample) {
+            //
+            $zscore2 = 0.00;
+            $entry = $sample['reported_viral_load'];
+            $sdev = $performanceStats[$sample['sample_id']]['sdev_rvl'];
+            $mean = $performanceStats[$sample['sample_id']]['average_rvl'];
+            if ($performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
+                $zscore2 = ($entry - $mean) / $sdev;
+            }
+            if ($zscore2 < 2) {
+                $overallScore += 100;
+            }
+            if ($zscore2 >= 2 && $zscore2 < 3) {
+                $overallScore+= 80;
+            }
+            if ($zscore2 >= 3) {
+                $overallScore+= 0;
+            }
+            //
+        }
+        $this->view->overallScore = ($overallScore/count($allSamples))??0;
+        // calculate overall score />
+
+        // get performance summary for the shipment
+        // $this->view->performanceSummary = $distributionDb->getPerformanceSummary($shipmentID);
+
+        $this->view->mid = $mapID;
+        $this->view->shipmentID = $shipmentID;
+        $this->view->participantId = $participantID;
+        $this->view->platformID = $platformID;
     }
 
     public function reportDownloadAction(){

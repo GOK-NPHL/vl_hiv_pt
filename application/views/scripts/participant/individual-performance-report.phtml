@@ -1,0 +1,429 @@
+<?php
+
+$platform_nm = $this->platform['PlatformName'];
+
+$shipment_id = $this->shipment['shipment_id'] ?? null;
+// summary
+$summary_stats = [
+	'enrolled' => 0,
+	'participated' => 0,
+	'satisfactory' => 0,
+	'unsatisfactory' => 0,
+];
+if (isset($this->distributionResponseSummary['aaData']) && !empty($this->distributionResponseSummary['aaData']) && $shipment_id) {
+
+	
+	$shipment_summary = array_filter($this->distributionResponseSummary['aaData'], function ($item) use ($shipment_id, $platform_nm) {
+		return $item['shipment_id'] == $shipment_id && $item['platform_name'] == $platform_nm;
+	});
+	// //enrolled
+	$summary_enrolled = array_unique(
+		array_column($shipment_summary, 'lab_code')
+	);
+	$summary_stats['enrolled'] = count($summary_enrolled);
+
+	// participated
+	$summary_participated = array_unique(
+		array_column(
+			array_filter($shipment_summary, function ($item) {
+				return $item['evaluated'] == 'yes';
+			}),
+			'lab_code'
+		)
+	);
+	$summary_stats['participated'] = count($summary_participated);
+
+
+	// for each item in the summary, aggregate the stats for each lab
+	foreach($summary_participated as $lab_code) {
+		$lab_summary = array_filter($shipment_summary, function ($item) use ($lab_code) {
+			return $item['lab_code'] == $lab_code;
+		});
+		$array_score = array_column($lab_summary, 'score');
+
+		// if the count of 'Acceptable' is equal to the count of the lab summary, then the lab is satisfactory
+		if (count(array_filter($array_score, function ($item) {
+			return $item == 'Acceptable';
+		})) == count($lab_summary)) {
+			$summary_stats['satisfactory']++;
+		} else {
+			$summary_stats['unsatisfactory']++;
+		}
+	}
+
+}
+
+
+
+require_once('tcpdf/tcpdf.php');
+
+// create new PDF document
+$pdf = new TCPDF('P', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+// remove default header/footer
+$pdf->setPrintHeader(false);
+$pdf->setPrintFooter(false);
+
+// set default monospaced font
+$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+// set margins
+$pdf->SetMargins(8, 15, 8, 10);
+
+// set auto page breaks
+$pdf->SetAutoPageBreak(FALSE, PDF_MARGIN_BOTTOM);
+
+// set image scale factor
+$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+
+// set some language-dependent strings (optional)
+if (@file_exists(dirname(__FILE__) . '/lang/eng.php')) {
+	require_once(dirname(__FILE__) . '/lang/eng.php');
+	$pdf->setLanguageArray($l);
+}
+
+// ---------------------------------------------------------
+
+// set font
+$pdf->SetFont('Helvetica', '', 11);
+
+// add a page
+$pdf->AddPage();
+
+$html = '<div style="border:2px solid black;">';
+
+$html .= '<table style="padding:5px;margin:10px;"><tr><td>';
+
+$html .= '<div style="text-align:center;margin:5px;font-size:0.95em;"><b>';
+$html .= '<img src="/images/country/moh-logo.png" width="80px"><br>';
+$html .= 'MINISTRY OF HEALTH<br>';
+$html .= 'NATIONAL PUBLIC HEALTH LABORATORY<br>';
+$html .= 'KENYA EXTERNAL QUALITY ASSESSMENT SCHEME (KNEQAS)<br>';
+$html .= 'HIV MOLECULAR - VL PROFICIENCY TESTING<br></b>';
+$html .= 'P.O Box 20750 - 00202 NAIROBI Email: nphlpt@nphl.go.ke Help Desk: helpdesk.nphl.go.ke<br>';
+$html .= '</div><b style="text-align:center; width:100%;">';
+$html .= '<span style="font-size: 1.3em;display: inline-block; text-align:center; width:100%;">';
+$html .= "{$this->distribution['distribution_name']} - {$this->shipment['scheme_name']} Proficiency Testing Report</span> </b>";
+// $html .= "{$this->shipment['scheme_name']} Proficiency Testing Report</span></b>";
+
+$html .= '</td></tr><tr><td>';
+
+$html .= '<table style="width:100%;margin:15px auto; font-size:0.9em;">';
+$html .= '<tr><td colspan="2"><b>Lab Code </b>: ' . $this->participant['MflCode'];
+$html .= '&nbsp; &nbsp; &nbsp; <b>Lab Name</b>: ' . $this->participant['institute_name'] . '</td>';
+$html .= '<td><b>Phone No</b>: ' . $this->participant['lab_phone'] . '</td>';
+// $html .= '<td><b>Platform</b>: '.$this->platform['PlatformName'].'</td>';
+$html .= '</tr></table>';
+
+$html .= '</td></tr><tr><td>';
+
+$html .= '<table style="width:100%;margin:10px auto;">';
+$html .= '<tr class="dark">';
+$html .= '<td style="width:30%;"><b>Shipment Date</b></td>';
+$html .= '<td style="width:20%;">' . $this->dateFormat($this->shipment['shipment_date']) . '</td>';
+$html .= '<td style="width:30%;"><b>Result Submission Date</b></td>';
+$html .= '<td>' . $this->dateFormat($this->shipment['lastdate_response']) . '</td>';
+$html .= '</tr>';
+
+$html .= '<tr class ="light">';
+$html .= '<td><b>Specimen Receipt Date</b></td>';
+$html .= '<td>' . $this->dateFormat($this->shipment["shipment_receipt_date"]) . '</td>';
+$html .= '<td><b>Testing Date</b></td> ';
+$html .= '<td>' . $this->dateFormat($this->shipment["shipment_test_date"]) . '</td>';
+$html .= '</tr><tr>';
+
+$html .= '<td><b>Specimen Volume used for testing</b></td> ';
+$html .= '<td>' . $this->shipment['attributes']['specimen_volume'] . '</td>';
+$html .= '<td><b>Sample Volume Received</b></td>';
+$html .= '<td>' . $this->shipment['attributes']['specimen_volume'] . '</td>';
+$html .= '</tr>';
+
+$html .= '<tr class ="dark">';
+$html .= '<td><b>Kit Lot Number</b></td>';
+$html .= '<td>' . (isset($this->shipment['attributes']['assay_lot_number']) ? $this->shipment['attributes']['assay_lot_number'] : '') . '</td>';
+$html .= '<td><b>Kit Expiration Date </b></td>';
+$html .= '<td>' . (isset($this->shipment['attributes']['assay_expiration_date']) ? $this->dateFormat($this->shipment['attributes']['assay_expiration_date']) : '') . '</td>';
+$html .= '</tr></table>';
+
+$html .= '<tr>';
+$html .= '<td><b>Platform</b></td>';
+$html .= '<td>' . (isset($this->platform['PlatformName']) ? $this->platform['PlatformName'] : '') . '</td>';
+$html .= '<td><b>Equipment serial number</b></td>';
+$html .= '<td>' . (isset($this->shipment['attributes']['equipment_serial_no']) ? $this->dateFormat($this->shipment['attributes']['equipment_serial_no']) : '') . '</td>';
+$html .= '</tr>';
+
+$html .= '</td></tr><tr><td>';
+
+$html .= '<table style="border: 1px solid #000;">';
+$html .= '<thead style="' . ((isset($this->shipment['is_pt_test_not_performed']) && $this->shipment['is_pt_test_not_performed'] == 'yes') ? 'display:none;' : '') . '">';
+$html .= '<tr style="font-size:0.8em;">';
+$html .= '<th style="border:1px solid #000;"><b>Sample</b></th>';
+$html .= '<th style="border:1px solid #000;"><b>Results (log<sub>10</sub> copies/ml)</b></th>';
+$html .= '<th style="border:1px solid #000;"><b>Mean</b></th>';
+$html .= '<th style="border:1px solid #000;"><b>SD</b></th>';
+$html .= '<th style="border:1px solid #000;"><b>Z-Score</b></th>';
+$html .= '<th style="border:1px solid #000;"><b>Score</b></th>';
+$html .= '<th style="border:1px solid #000;"><b>Performance</b></th>';
+$html .= '</tr>';
+$html .= '</thead>';
+$html .= '<tbody>';
+
+foreach ($this->allSamples as $sample) {
+	if (isset($this->shipment['is_pt_test_not_performed']) && $this->shipment['is_pt_test_not_performed'] == 'yes') {
+		$sample['mandatory'] = 0;
+	}
+
+	$html .= '<tr style="font-size:0.95em;' . ((isset($this->shipment['is_pt_test_not_performed']) && $this->shipment['is_pt_test_not_performed'] == 'yes') ? 'display:none;' : '') . '">';
+	$html .= '<td style="border:1px solid black;padding-left: 20px;">' . $sample['sample_label'] . '</td>';
+	$html .= '<td style="border:1px solid black;text-align:center;">' . $sample['reported_viral_load'] . '</td>';
+	$html .= '<td style="border:1px solid black;text-align:center;">' . number_format($this->performanceStats[$sample['sample_id']]['average_rvl'], 3) . '</td>';
+	$html .= '<td style="border:1px solid black;text-align:center;">' . number_format($this->performanceStats[$sample['sample_id']]['sdev_rvl'], 2) . '</td>';
+
+	$html .= '<td style="border:1px solid black;text-align:center;">';
+	// $zscore = 0.00;
+	// if($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0){
+	// 	$zscore = round(abs(round($sample['reported_viral_load'],1)-$this->performanceStats[$sample['sample_id']]['reference_result'])/$this->performanceStats[$sample['sample_id']]['sdev_rvl'],1);
+	// }
+	// $html .= number_format($zscore,1);
+	/// z-score
+	$zscore = 0.00;
+	$zscore2 = 0.00;
+	$entry = $sample['reported_viral_load'];
+	$sdev = $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
+	$mean = $this->performanceStats[$sample['sample_id']]['average_rvl'];
+	if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
+		$zscore = round(abs(round($sample['reported_viral_load'], 1) - $this->performanceStats[$sample['sample_id']]['average_rvl']) / $this->performanceStats[$sample['sample_id']]['sdev_rvl'], 1);
+
+		$zscore2 = ($entry - $mean) / $sdev;
+	}
+	// echo number_format($zscore, 1);
+	// echo $sample['calculated_score'];
+	$html .= number_format($zscore2, 3);
+	/// z-score
+	$html .= '</td>';
+
+	$html .= '<td style="border:1px solid black;text-align:center;">';
+	// $html .= round($sample['calculated_score']*100).'%';
+	/// pc%
+	$zscore2 = 0.00;
+	$entry = $sample['reported_viral_load'];
+	$sdev = $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
+	$mean = $this->performanceStats[$sample['sample_id']]['average_rvl'];
+	if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
+		$zscore2 = ($entry - $mean) / $sdev;
+	}
+	if ($zscore2 < 2) $html .= "100%";
+	if ($zscore2 >= 2 && $zscore2 < 3) $html .= "80%";
+	if ($zscore2 >= 3) $html .= "0%";
+	/// pc%
+	$html .= '</td>';
+
+	$html .= '<td style="border:1px solid black;text-align:center;font-size:0.8em;">';
+	// if($sample['calculated_score'] == 1)$html .= "ACCEPTABLE"; 
+	// if($sample['calculated_score'] == 0.8)$html .= "QUESTIONABLE"; 
+	// if($sample['calculated_score'] == 0)$html .= "UNACCEPTABLE"; 
+
+	/// perf
+	$zscore2 = 0.00;
+	$entry = $sample['reported_viral_load'];
+	$sdev = $this->performanceStats[$sample['sample_id']]['sdev_rvl'];
+	$mean = $this->performanceStats[$sample['sample_id']]['average_rvl'];
+	if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
+		$zscore2 = ($entry - $mean) / $sdev;
+	}
+	if ($zscore2 < 2) $html .= "ACCEPTABLE";
+	if ($zscore2 >= 2 && $zscore2 < 3) $html .= "QUESTIONABLE";
+	if ($zscore2 >= 3) $html .= "UNACCEPTABLE";
+	/// perf
+
+	$html .= '</td></tr>';
+}
+
+if (isset($this->shipment['is_pt_test_not_performed']) && $this->shipment['is_pt_test_not_performed'] == 'yes') {
+	$html .= '<tr><td colspan="6">';
+	$html .= '<b>Reason for not testing</b> : ';
+	$html .= $this->shipment['vl_not_tested_reason'];
+	$html .= '</td></tr>';
+	$html .= '<tr><td colspan="6"><b>Your comments</b> : ';
+	$html .= $this->shipment['pt_test_not_performed_comments'] . '</td></tr>';
+	$html .= '<tr><td colspan="6"><b>Do you need any support from the PT Provider ?</b> ';
+	$html .= $this->shipment['pt_support_comments'] . '</td></tr>';
+}
+$html .= '</tbody></table>';
+
+// Do not display participant aggregate score
+$htmlx = '</td></tr><tr><td align="right">';
+
+$htmlx .= '<b style="font-size: 1.2em;">';
+$htmlx .= round($this->overallScore) . "% &nbsp;";
+if ($this->shipment["final_result"] == 1) {
+	$htmlx .= 'Satisfactory';
+} else {
+	$htmlx .= '<span style="color:red;">Unsatisfactory</span>';
+}
+
+$htmlx .= '</b>';
+$html .= '</td></tr>';
+$html .= '<tr><td>';
+$html .= '<u style="font-size:0.9em;">Z-Score Performance Intepretation</u>: ';
+$html .= '<ul style="font-size:0.9em;"><li>&lt; 2 - Satisfactory</li>';
+$html .= '<li>&gt; 2 and &lt; 3 - Questionable</li>';
+$html .= '<li>&gt; 3 - Unsatisfactory</li></ul>';
+$html .= '</td></tr>';
+
+$html .= '<tr><td>';
+$html .= '<b style="font-size:0.9em;">Expert comment:</b> ';
+$html .= 'Thank you for participating in ' . ($this->shipment['code'] ?? ' the KNEQAS Viral Load PT') . '. Your overall score is <b> ' . ($this->overallScore >= 80 ? 'Satisfactory' : 'Unsatisfactory') . ' (' . round($this->overallScore) . '%)</b>. ';
+$html .= '</td></tr>';
+
+
+$html .= '<tr><td>';
+$html .= '<b><u style="font-size:0.9em;">Testing scheme information:</u>:</b> ';
+$html .= '</td></tr>';
+
+$html .= '<tr><td>';
+$html .= '<ol style="font-size:0.9em;">';
+$html .= '<li>Molecular VL PT is a quantitative scheme.</li>';
+$html .= '<li>The panel samples come as plasma samples.</li>';
+$html .= '<li>Consensus values and expert opinions are used to grade the participants.</li>';
+$html .= '<li>The panel samples have been tested for stability and are stable.</li>';
+$html .= '<li>Homogeneity was done using systematic random sampling and the results were the same as the expected results.</li>';
+$html .= '<li>Participants performance report is confidential and will only be shared with the responsible quality assurance officers for the participating laboratories and for any purpose of corrective interventions.</li>';
+$html .= '<li>Subcontracted services: PT panel distribution, return of results.</li>';
+$html .= '<li>The schemes final report with summaries of overall performance analysis are indicated below.</li>';
+$html .= '</ol>';
+$html .= '</td></tr>';
+
+
+$html .= '<tr><td>';
+$html .= '<table style="border: 1px solid #000; text-align: center;">';
+$html .= '<tr style="font-weight:bold;"> <th style="border:1px solid #000000;">Enrolment</th>  <th style="border:1px solid #000000;">Participation</th>  <th style="border:1px solid #000000;">Satisfactory</th>  <th style="border:1px solid #000000;">Unsatisfactory</th> </tr>';
+$html .= '<tr>';
+// <enrolled
+$html .= '<td style="border:1px solid #000000;">' . ($summary_stats['enrolled'] ?? 0) . '</td>';
+// <participated
+$html .= '<td style="border:1px solid #000000;">' . ($summary_stats['participated'] ?? 0) . '</td>';
+// <satisfactory
+$html .= '<td style="border:1px solid #000000;">' . ($summary_stats['satisfactory'] ?? 0) . '</td>';
+// <unsatisfactory
+$html .= '<td style="border:1px solid #000000;">' . ($summary_stats['unsatisfactory'] ?? 0) . '</td>';
+$html .= '</tr>';
+$html .= '</table>';
+$html .= '</td></tr>';
+
+
+$html .= '<tr><td>';
+if (isset($this->distribution['finalized_at']) && strlen($this->distribution['finalized_at']) > 10) {
+	$html .= '<table><tr>';
+	$html .= '<td colspan="5">&nbsp;</td>';
+	// $html .= '<td style="border-bottom:1px solid #000;" rowspan="2" align="center"><img style="height:35px;" src="/images/approver.png" /></td></tr>';
+
+	$html .= '<tr><td align="right">Approved By &nbsp;</td>';
+	$html .= '<td style="border-bottom:1px solid #000;" align="center">Charity Maina</td>';
+	$html .= '<td align="right">Date &nbsp;</td>';
+	$html .= '<td align="center" style="border-bottom:1px solid #000;">' . $this->dateFormat(substr($this->distribution['finalized_at'], 0, 10)) . '</td>';
+	// $html .= '<td align="right">Sign &nbsp;</td></tr>';
+	$html .= '<tr><td>&nbsp;</td><td align="center">For Head NPHL</td></tr></table>';
+}
+
+$html .= '</td></tr><tr><td> &nbsp;';
+$html .= '</td></tr><tr><td>';
+$html .= '<table style="width:100%;"><tr>';
+$html .= '<td style="font-size:0.8em;">MOH/DLS/NPHL/QMS-3/KNEQAS/HIV/VL/F/02</td>';
+$html .= '<td style="font-size:0.8em;text-align:right;" align="center">Page 1 of 2</td>';
+$html .= '</tr></table>';
+
+$html .= '</td></tr></table></div>';
+
+
+$pdf->writeHTML($html, true, false, true, false, '');
+//pg2
+$pdf->AddPage();
+
+$html2 = '<div style="display:flex; flex-direction: column; align-items: center; justify-content: space-between;">';
+$html2 .= '<table style="padding:10px;margin:10px; width:100%; border:2px solid black;">';
+$html2 .= '<tr>';
+$html2 .= '<td>';
+$html2 .= '<b>Date Authorized and released</b>';
+$html2 .= '</td>';
+$html2 .= '<td>';
+$html2 .= $this->dateFormat($this->shipment['lastdate_response']);
+$html2 .= '</td>';
+$html2 .= '</tr>';
+$html2 .= '<tr>';
+$html2 .= '<td colspan="2" style="text-align:center;">';
+$html2 .= '<b>Co-ordinator Contacts</b>';
+$html2 .= '</td>';
+$html2 .= '</tr>';
+
+$html2 .= '<tr>';
+$html2 .= '<td>';
+$html2 .= '<b>Name:</b> Joseph Ombayo<br/>';
+$html2 .= '<b>Tel:</b> 0721547885<br/>';
+$html2 .= '</td>';
+$html2 .= '<td>';
+$html2 .= '<b>Name:</b> Naomi Gatambu<br/>';
+$html2 .= '<b>Tel:</b> 0728226292<br/>';
+$html2 .= '</td>';
+$html2 .= '</tr>';
+$html2 .= '<tr>';
+$html2 .= '<td colspan="2" style="text-align:left;">';
+$html2 .= '<b>Report Approved by:</b>';
+$html2 .= '</td>';
+$html2 .= '</tr>';
+$html2 .= '<tr>';
+$html2 .= '<td colspan="2">';
+$html2 .= '<ul style="list-style-type: none;">';
+$html2 .= '<li>Charity Maina</li>';
+$html2 .= '<li>QA Manager, DLS || KNEQAS PT Coordinator</li>';
+$html2 .= '<li>Department of National Laboratory Services</li>';
+$html2 .= '</ul>';
+$html2 .= '</td>';
+$html2 .= '</tr>';
+$html2 .= '</table>';
+$html2 .= '<div style="margin: 30px auto;">';
+$html2 .= '<p style="text-align: center; font-size:1em;">Thank you for your participation</p>';
+$html2 .= '<p style="text-align: center; font-size:1.2em"><b>END OF REPORT</b></p>';
+$html2 .= '</div>';
+$html2 .= '<table style="width: 100%;">';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr><td colspan="3"><div style="height: 500px; width: 100%;">&nbsp;</div></td></tr>';
+$html2 .= '<tr>';
+$html2 .= '<td colspan="2" style="font-size:0.8em;">MOH/DLS/NPHL/QMS-3/KNEQAS/HIV/VL/F/02</td>';
+$html2 .= '<td style="font-size:0.8em;" align="center">Page 2 of 2</td>';
+$html2 .= '</tr></table>';
+$html2 .= '</div>';
+
+$pdf->writeHTML($html2, true, false, true, false, '');
+$fileName = $this->mid . "-" . $this->shipmentID . "-" . $this->participantId . ".pdf";
+$pdf->Output($fileName, 'I');
+
+exit;

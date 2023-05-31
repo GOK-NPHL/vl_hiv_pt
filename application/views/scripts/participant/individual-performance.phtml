@@ -5,13 +5,14 @@
     <h4>
         <strong><?php echo "{$this->shipment['scheme_name']} - {$this->platform['PlatformName']}"; ?> Performance</strong>
         <div style="margin: 0px auto 0px auto; text-align: center; float: right;">
+            <a href="/participant/individual-performance-report/mid/<?php echo $this->mid; ?>" target="_blank" class="btn btn-primary">Download</a>
             <a href="javascript:void(0)" class="btn btn-primary" onclick="javascript:window.history.back()">Back</a>
         </div>
 
     </h4>
 </section>
 <section class="content">
-    <div class="box">
+    <div class="container box">
         <form>
             <div class="box-body">
                 <input type="hidden" id="smid" name="smid" value="<?php echo $this->shipment['map_id']; ?>" />
@@ -351,7 +352,29 @@
                                 ?> %).
                         </strong>
                     </div>
-                    <hr/>
+                    <br/>
+                    <div>
+                        <div>
+                            <h4>
+                                <b><u>Testing scheme information:</u>:</b>
+                            </h4>
+                        </div>
+                        <div>
+                            <td>
+                                <ol>
+                                    <li>Molecular VL PT is a quantitative scheme.</li>
+                                    <li>The panel samples come as plasma samples.</li>
+                                    <li>Consensus values and expert opinions are used to grade the participants.</li>
+                                    <li>The panel samples have been tested for stability and are stable.</li>
+                                    <li>Homogeneity was done using systematic random sampling and the results were the same as the expected results.</li>
+                                    <li>Participants performance report is confidential and will only be shared with the responsible quality assurance officers for the participating laboratories and for any purpose of corrective interventions.</li>
+                                    <li>Subcontracted services: PT panel distribution, return of results.</li>
+                                    <li>The schemes final report with summaries of overall performance analysis are indicated below.</li>
+                                </ol>
+                            </td>
+                        </div>
+                    </div>
+                    <hr />
                     <div class="table-responsive table-bordered table-condensed">
                         <h4>Performance summary</h4>
                         <table class="table">
@@ -362,16 +385,16 @@
                                 <th style="border:1px solid #000000;">Unsatisfactory</th>
                             </tr>
                             <tr>
-                                <td style="border:1px solid #000000;"> 
+                                <td style="border:1px solid #000000;">
                                     <?php echo $this->summaryStats['enrolled'] ?? 0; ?>
                                 </td>
-                                <td style="border:1px solid #000000;"> 
+                                <td style="border:1px solid #000000;">
                                     <?php echo $this->summaryStats['participated'] ?? 0; ?>
                                 </td>
-                                <td style="border:1px solid #000000;"> 
+                                <td style="border:1px solid #000000;">
                                     <?php echo $this->summaryStats['satisfactory'] ?? 0; ?>
                                 </td>
-                                <td style="border:1px solid #000000;"> 
+                                <td style="border:1px solid #000000;">
                                     <?php echo $this->summaryStats['unsatisfactory'] ?? 0; ?>
                                 </td>
                             </tr>
@@ -380,16 +403,25 @@
                     <div class="table-responsive">
                         <table class="table">
                             <tr>
-                                <td colspan="5">&nbsp;</td>
-                                <td style="border-bottom: 1px solid #000;width: 15%;vertical-align: bottom;" rowspan="2">
-                                    <!-- <img style="height:35px;" src="/images/approver.png" /> -->
+                                <td colspan="1">Date authorized and released</td>
+                                <td style="border-bottom: 1px solid #000 ;vertical-align: bottom;">
+                                    <?php echo $this->dateFormat($this->shipment['lastdate_response']); ?>
                                 </td>
                             </tr>
+                            <!-- <tr>
+                                <td colspan="5">&nbsp;</td>
+                                <td style="border-bottom: 1px solid #000;width: 15%;vertical-align: bottom;" rowspan="2">
+                                    <img style="height:35px;" src="/images/approver.png" />
+                                </td>
+                            </tr> -->
+                            <tr>
                             <tr>
                                 <td style="width:10%;">Approved By</td>
-                                <td style="border-bottom: 1px solid #000;width: 15%;">Charity Maina</td>
+                                <td style="width: 15%;">Charity Maina
+                                <br/>QA Manager, DLS || KNEQAS PT Coordinator
+                                <br/>Department of National Laboratory Services</td>
                                 <td style="width:10%;text-align: right;">Date</td>
-                                <td style="border-bottom: 1px solid #000;width: 15%;">
+                                <td style="width: 15%;">
                                     <?php echo strlen($this->distribution['finalized_at']) > 10 ? substr($this->distribution['finalized_at'], 0, 10) : ''; ?>
                                 </td>
                                 <!-- <td style="width: 10%;text-align: right;">Sign</td> -->
