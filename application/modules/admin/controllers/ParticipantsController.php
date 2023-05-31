@@ -420,7 +420,7 @@ class Admin_ParticipantsController extends Zend_Controller_Action
         $platform_nm = $platform['PlatformName'];
 
         $distributionDb = new Application_Model_DbTable_Distribution();
-        $performanceStats = $distributionDb->getPerformanceStats($shipmentID);
+        $performanceStats = $distributionDb->getPerformanceStats($shipmentID, $platformID);
         $this->view->performanceStats = $performanceStats;
 
         // < calculate overall score
@@ -540,7 +540,7 @@ class Admin_ParticipantsController extends Zend_Controller_Action
         $this->view->platform = $platformService->getPlatform($platformID);
 
         $distributionDb = new Application_Model_DbTable_Distribution();
-        $performanceStats = $distributionDb->getPerformanceStats($shipmentID);
+        $performanceStats = $distributionDb->getPerformanceStats($shipmentID, $platformID);
         $this->view->performanceStats = $performanceStats;
 
         $this->view->distributionResponseSummary = $distributionDb->getDistributionResponseSummary($shipment['distribution_id']);
