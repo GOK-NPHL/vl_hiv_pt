@@ -884,6 +884,22 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
             return $output;
         */
 
+
+
+        $schemetype = "'vl'";
+        $wherePlatform = "";
+        $whereShipment = "";
+
+        if (isset($parameters['pt_platform']) && intval($parameters['pt_platform']) > 0) {
+            $wherePlatform = "AND pl.ID = " . $parameters['pt_platform'];
+        }
+
+        if(isset($parameters['shipment_id']) && intval($parameters['shipment_id']) == 1){
+            $whereShipment = "AND shipment.shipment_id = " . $parameters['shipment_id'];
+        }else{
+            // by default, pick most recent shipment, else pick the one specified
+            $whereShipment = "AND shipment.shipment_id = (SELECT shipment_id FROM shipment WHERE scheme_type = $schemetype ORDER BY shipment_id DESC LIMIT 1)";
+        }
         $query = "select
             shipment.shipment_code as shipment_code,
             shipment.shipment_id as shipment_id,
@@ -903,8 +919,8 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
             join reference_result_vl ref on result.sample_id = ref.sample_id
             join shipment_participant_map sp_map on result.shipment_map_id = sp_map.map_id
             join participant lab on sp_map.participant_id = lab.participant_id
-            join shipment on shipment.shipment_id = sp_map.shipment_id
-            join platforms platform on sp_map.platform_id = platform.ID
+            join shipment on shipment.shipment_id = sp_map.shipment_id $whereShipment
+            join platforms platform on sp_map.platform_id = platform.ID $wherePlatform
         where ref.control = 0
         group by shipment.shipment_code, platform.ID, platform.PlatformName, lab.institute_name, ref.sample_label, result.reported_viral_load
         ";

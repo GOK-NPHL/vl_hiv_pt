@@ -45,7 +45,7 @@ if (isset($this->chosenSurvey) && isset($this->chosenPlatform) && isset($this->c
 
 
     <div class="box">
-        <div class="box-body">
+        <div class="box-body" style="padding: 12px;">
             <?php if (isset($this->message)) : ?>
                 <div class="alert alert-dismissable alert-success">
                     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
@@ -55,15 +55,21 @@ if (isset($this->chosenSurvey) && isset($this->chosenPlatform) && isset($this->c
                 </div>
 
             <?php endif; ?>
-            <div class="form-inline hidden">
+            <div class="form-inline">
                 <form method="POST" action="/admin/participants/cycle-summary-2">
                     <div class="form-group">
                         <label class="form-label" style="margin-left: 20px;" for="pt_survey">PT Survey: </label>
                         <select class="form-control" id="pt_survey" name="pt_survey">
-                            <option value="0"> -- All -- </option>
+                            <!-- <option value="0"> -- All -- </option> -->
                             <?php
-                            $selected = "";
-                            foreach ($this->surveys as $survey) {
+                            $selected = ""; 
+                            
+                            foreach ($this->surveys as $k=>$survey) {
+                                // pick the last one by default
+                                if (!$oneChosen && $k == count($this->surveys) - 1) {
+                                    $this->chosenSurvey = $survey->distribution_id;
+                                    $selected = " selected";
+                                }
                                 if ($this->chosenSurvey == $survey->distribution_id) $selected = " selected";
                                 echo "<option value='{$survey->distribution_id}' $selected>{$survey->distribution_name}</option>";
                                 $selected = "";
@@ -259,7 +265,7 @@ if (isset($this->chosenSurvey) && isset($this->chosenPlatform) && isset($this->c
                                 }
                                 lab_perc += percentage_score;
 
-                                console.log("score=", score, " percentage_score=", percentage_score);
+                                // console.log("score=", score, " percentage_score=", percentage_score);
 
                                 summary_html += '<td><small>'
                                 summary_html += '<span style="display: flex; align-items: center; justify-content: space-between;">' + 'Reported: <b>' + sample_data[0].reported_viral_load + '</b></span>'
@@ -301,7 +307,7 @@ if (isset($this->chosenSurvey) && isset($this->chosenPlatform) && isset($this->c
         summary_html += '</div>';
     });
 
-    console.log(data);
+    // console.log(data);
 
     // add to page
     if (document.querySelector('#summary_container')) {
