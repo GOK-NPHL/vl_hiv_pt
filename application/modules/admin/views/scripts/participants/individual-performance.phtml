@@ -165,13 +165,9 @@
                                         if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
                                             $zscore2 = ($entry - $mean) / $sdev;
                                         }
-                                        if (str_contains($sample['reported_viral_load'], '#')){
-                                            echo "0%";
-                                        } else {
-                                            if ($zscore2 < 2) echo "100%";
-                                            if ($zscore2 >= 2 && $zscore2 < 3) echo "80%";
-                                            if ($zscore2 >= 3) echo "0%";
-                                        }
+                                        if ($zscore2 < 2) echo "100%";
+                                        if ($zscore2 >= 2 && $zscore2 < 3) echo "80%";
+                                        if ($zscore2 >= 3) echo "0%";
                                         ?>
                                     </td>
                                     <td style="text-align:center;">
@@ -183,13 +179,9 @@
                                         if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
                                             $zscore2 = ($entry - $mean) / $sdev;
                                         }
-                                        if (str_contains($sample['reported_viral_load'], '#')){
-                                            echo "UNACCEPTABLE";
-                                        } else {
-                                            if ($zscore2 < 2) echo "ACCEPTABLE";
-                                            if ($zscore2 >= 2 && $zscore2 < 3) echo "QUESTIONABLE";
-                                            if ($zscore2 >= 3) echo "UNACCEPTABLE";
-                                        }
+                                        if ($zscore2 < 2) echo "ACCEPTABLE";
+                                        if ($zscore2 >= 2 && $zscore2 < 3) echo "QUESTIONABLE";
+                                        if ($zscore2 >= 3) echo "UNACCEPTABLE";
                                         ?>
                                     </td>
                                 </tr>
