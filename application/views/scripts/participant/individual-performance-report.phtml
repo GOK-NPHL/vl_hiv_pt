@@ -212,7 +212,7 @@ foreach ($this->allSamples as $sample) {
 	if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
 		$zscore2 = ($entry - $mean) / $sdev;
 	}
-	if (str_contains($sample['reported_viral_load'], '#')){
+	if (strpos($sample['reported_viral_load'], '#')){
 		$html .= "0%";
 	} else {
 		if ($zscore2 < 2) $html .= "100%";
@@ -235,7 +235,7 @@ foreach ($this->allSamples as $sample) {
 	if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
 		$zscore2 = ($entry - $mean) / $sdev;
 	}
-	if (str_contains($sample['reported_viral_load'], '#')){
+	if (strpos($sample['reported_viral_load'], '#')){
 		$html .= "UNACCEPTABLE";
 	} else {
 		if ($zscore2 < 2) $html .= "ACCEPTABLE";
