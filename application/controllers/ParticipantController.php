@@ -294,14 +294,18 @@ class ParticipantController extends Zend_Controller_Action {
             if ($performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
                 $zscore2 = ($entry - $mean) / $sdev;
             }
-            if ($zscore2 < 2) {
-                $overallScore += 100;
-            }
-            if ($zscore2 >= 2 && $zscore2 < 3) {
-                $overallScore+= 80;
-            }
-            if ($zscore2 >= 3) {
+            if (strpos($sample['reported_viral_load'], '#') !== false){
                 $overallScore+= 0;
+            } else {
+                if ($zscore2 < 2) {
+                    $overallScore += 100;
+                }
+                if ($zscore2 >= 2 && $zscore2 < 3) {
+                    $overallScore+= 80;
+                }
+                if ($zscore2 >= 3) {
+                    $overallScore+= 0;
+                }
             }
             //
         }
@@ -438,14 +442,18 @@ class ParticipantController extends Zend_Controller_Action {
             if ($performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
                 $zscore2 = ($entry - $mean) / $sdev;
             }
-            if ($zscore2 < 2) {
-                $overallScore += 100;
-            }
-            if ($zscore2 >= 2 && $zscore2 < 3) {
-                $overallScore+= 80;
-            }
-            if ($zscore2 >= 3) {
-                $overallScore+= 0;
+            if (strpos($sample['reported_viral_load'], '#') !== false){
+                $overallScore += 0;
+            } else {
+                if ($zscore2 < 2) {
+                    $overallScore += 100;
+                }
+                if ($zscore2 >= 2 && $zscore2 < 3) {
+                    $overallScore+= 80;
+                }
+                if ($zscore2 >= 3) {
+                    $overallScore+= 0;
+                }
             }
             //
         }
