@@ -212,9 +212,13 @@ foreach ($this->allSamples as $sample) {
 	if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
 		$zscore2 = ($entry - $mean) / $sdev;
 	}
-	if ($zscore2 < 2) $html .= "100%";
-	if ($zscore2 >= 2 && $zscore2 < 3) $html .= "80%";
-	if ($zscore2 >= 3) $html .= "0%";
+	if (str_contains($sample['reported_viral_load'], '#')){
+		$html .= "0%";
+	} else {
+		if ($zscore2 < 2) $html .= "100%";
+		if ($zscore2 >= 2 && $zscore2 < 3) $html .= "80%";
+		if ($zscore2 >= 3) $html .= "0%";
+	}
 	/// pc%
 	$html .= '</td>';
 
@@ -231,9 +235,13 @@ foreach ($this->allSamples as $sample) {
 	if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
 		$zscore2 = ($entry - $mean) / $sdev;
 	}
-	if ($zscore2 < 2) $html .= "ACCEPTABLE";
-	if ($zscore2 >= 2 && $zscore2 < 3) $html .= "QUESTIONABLE";
-	if ($zscore2 >= 3) $html .= "UNACCEPTABLE";
+	if (str_contains($sample['reported_viral_load'], '#')){
+		$html .= "UNACCEPTABLE";
+	} else {
+		if ($zscore2 < 2) $html .= "ACCEPTABLE";
+		if ($zscore2 >= 2 && $zscore2 < 3) $html .= "QUESTIONABLE";
+		if ($zscore2 >= 3) $html .= "UNACCEPTABLE";
+	}
 	/// perf
 
 	$html .= '</td></tr>';
