@@ -184,7 +184,7 @@
                                             $zscore2 = ($entry - $mean) / $sdev;
                                         }
                                         if(strpos($sample['reported_viral_load'], '#')){
-                                            echo 'ACCEPTABLE';
+                                            echo 'UNACCEPTABLE';
                                         } else {
                                             if ($zscore2 < 2) echo "ACCEPTABLE";
                                             if ($zscore2 >= 2 && $zscore2 < 3) echo "QUESTIONABLE";
