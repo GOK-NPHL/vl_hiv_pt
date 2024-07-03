@@ -191,6 +191,7 @@
                                             if (strpos($sample['reported_viral_load'], '#')){
                                                 echo "0%";
                                             } else {
+                                                echo "..";
                                                 if ($zscore2 < 2) echo "100%";
                                                 if ($zscore2 >= 2 && $zscore2 < 3) echo "80%";
                                                 if ($zscore2 >= 3) echo "0%";
@@ -209,6 +210,7 @@
                                             if (strpos($sample['reported_viral_load'], '#')){
                                                 echo "UNACCEPTABLE";
                                             } else {
+                                                echo "..";
                                                 if ($zscore2 < 2) echo "ACCEPTABLE";
                                                 if ($zscore2 >= 2 && $zscore2 < 3) echo "QUESTIONABLE";
                                                 if ($zscore2 >= 3) echo "UNACCEPTABLE";
