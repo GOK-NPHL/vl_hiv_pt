@@ -152,7 +152,6 @@
                                         }
                                         // echo number_format($zscore, 1);
                                         // echo $sample['calculated_score'];
-                                        echo gettype($sample['reported_viral_load']);
                                         echo number_format($zscore2, 3);
                                         ?>
                                     </td>
@@ -166,9 +165,13 @@
                                         if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
                                             $zscore2 = ($entry - $mean) / $sdev;
                                         }
-                                        if ($zscore2 < 2) echo "100%";
-                                        if ($zscore2 >= 2 && $zscore2 < 3) echo "80%";
-                                        if ($zscore2 >= 3) echo "0%";
+                                        if($sample['reported_viral_load'] == '#' || $sample['reported_viral_load'] == '##' || str_contains($sample['reported_viral_load'], '#')){
+                                            echo '0%';
+                                        } else {
+                                            if ($zscore2 < 2) echo "100%";
+                                            if ($zscore2 >= 2 && $zscore2 < 3) echo "80%";
+                                            if ($zscore2 >= 3) echo "0%";
+                                        }
                                         ?>
                                     </td>
                                     <td style="text-align:center;">
