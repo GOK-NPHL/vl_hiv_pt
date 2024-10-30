@@ -148,8 +148,8 @@ $html .= '</tr></table>';
 $html .= '<tr>';
 $html .= '<td><b>Platform</b></td>';
 $html .= '<td>' . (isset($this->platform['PlatformName']) ? $this->platform['PlatformName'] : '') . '</td>';
-$html .= '<td><b>Equipment serial number</b></td>';
-$html .= '<td>' . (isset($this->shipment['attributes']['equipment_serial_no']) ? $this->dateFormat($this->shipment['attributes']['equipment_serial_no']) : '') . '</td>';
+// $html .= '<td><b>Equipment serial number</b></td>';
+// $html .= '<td>' . (isset($this->shipment['attributes']['equipment_serial_no']) ? $this->dateFormat($this->shipment['attributes']['equipment_serial_no']) : '') . '</td>';
 $html .= '</tr>';
 
 $html .= '</td></tr><tr><td>';
@@ -212,9 +212,13 @@ foreach ($this->allSamples as $sample) {
 	if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
 		$zscore2 = ($entry - $mean) / $sdev;
 	}
-	if ($zscore2 < 2) $html .= "100%";
-	if ($zscore2 >= 2 && $zscore2 < 3) $html .= "80%";
-	if ($zscore2 >= 3) $html .= "0%";
+	if (strpos($sample['reported_viral_load'], '#') !== false){
+		$html .= "0%";
+	} else {
+		if ($zscore2 < 2) $html .= "100%";
+		if ($zscore2 >= 2 && $zscore2 < 3) $html .= "80%";
+		if ($zscore2 >= 3) $html .= "0%";
+	}
 	/// pc%
 	$html .= '</td>';
 
@@ -231,9 +235,13 @@ foreach ($this->allSamples as $sample) {
 	if ($this->performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
 		$zscore2 = ($entry - $mean) / $sdev;
 	}
-	if ($zscore2 < 2) $html .= "ACCEPTABLE";
-	if ($zscore2 >= 2 && $zscore2 < 3) $html .= "QUESTIONABLE";
-	if ($zscore2 >= 3) $html .= "UNACCEPTABLE";
+	if (strpos($sample['reported_viral_load'], '#') !== false){
+		$html .= "UNACCEPTABLE";
+	} else {
+		if ($zscore2 < 2) $html .= "ACCEPTABLE";
+		if ($zscore2 >= 2 && $zscore2 < 3) $html .= "QUESTIONABLE";
+		if ($zscore2 >= 3) $html .= "UNACCEPTABLE";
+	}
 	/// perf
 
 	$html .= '</td></tr>';

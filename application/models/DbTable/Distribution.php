@@ -669,12 +669,30 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
 
     public function getPerformanceStats($shipmentID, $platformID = null)
     {
+        $use_platform_category = true;
         $output = [];
         $query = "SELECT rrv.sample_id, ref.reference_result, COUNT(*) population, AVG(ROUND(rrv.reported_viral_load,1)) average_rvl, ROUND(STDDEV_POP(rrv.reported_viral_load),1) sdev_rvl FROM shipment_participant_map spm INNER JOIN response_result_vl rrv ON spm.map_id = rrv.shipment_map_id INNER JOIN reference_result_vl ref ON spm.shipment_id = ref.shipment_id AND rrv.sample_id = ref.sample_id WHERE spm.shipment_id = $shipmentID AND ref.control = 0 AND spm.is_pt_test_not_performed IS NULL ";
+        
+        $platformIDs = array();
+        if (isset($platformID) && $platformID != null && $platformID != '') {
+            // select peer platform under the same category
+            $platform_peers_query = "SELECT DISTINCT ID FROM platforms WHERE Category = (SELECT Category FROM platforms WHERE ID = $platformID)";
+            $platform_peers = $this->getAdapter()->fetchAll($platform_peers_query);
+            foreach ($platform_peers as $peer) {
+                $platformIDs[] = $peer['ID'];
+            }
+        }
+
         if (isset($platformID) && $platformID != null) {
-            $query .= " AND spm.platform_id = $platformID ";
+            if ($use_platform_category) {
+                $query .= " AND spm.platform_id IN (" . implode(',', $platformIDs) . ") ";
+            } else {
+                $query .= " AND spm.platform_id = $platformID ";
+            }
         }
         $query .= " GROUP BY rrv.sample_id";
+
+        
         $rResult = $this->getAdapter()->fetchAll($query);
 
         foreach ($rResult as $row) {
