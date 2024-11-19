@@ -270,7 +270,9 @@ class Admin_ParticipantsController extends Zend_Controller_Action
             $this->view->participant = $participantService->getParticipantDetails($participantID);
 
             $distributionService = new Application_Service_Distribution();
-            $this->view->distribution = $distributionService->getDistribution($this->view->shipment['distribution_id']);
+
+            $distrib = $distributionService->getDistribution($this->view->shipment['distribution_id']);
+            $this->view->distribution = $distrib;
 
             $platformService = new Application_Service_Platform();
             $this->view->platform = $platformService->getPlatform($platformID);
@@ -434,16 +436,16 @@ class Admin_ParticipantsController extends Zend_Controller_Action
             if ($performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
                 $zscore2 = ($entry - $mean) / $sdev;
             }
-            if (strpos($sample['reported_viral_load'], '#') !== false){
+            if (strpos($sample['reported_viral_load'], '#') !== false) {
                 $overallScore += 0;
             } else {
-                if ($zscore2 < 2) $overallScore+= 100;
-                if ($zscore2 >= 2 && $zscore2 < 3) $overallScore+= 80;
-                if ($zscore2 >= 3) $overallScore+= 0;
+                if ($zscore2 < 2) $overallScore += 100;
+                if ($zscore2 >= 2 && $zscore2 < 3) $overallScore += 80;
+                if ($zscore2 >= 3) $overallScore += 0;
             }
             //
         }
-        $this->view->overallScore = ($overallScore/count($allSamples))??0;
+        $this->view->overallScore = ($overallScore / count($allSamples)) ?? 0;
         // calculate overall score />
 
         ///////// ----------------------------
@@ -539,6 +541,10 @@ class Admin_ParticipantsController extends Zend_Controller_Action
         $shipment['attributes'] = json_decode($shipment['attributes'], true);
         $this->view->shipment = $shipment;
 
+        $distributionService = new Application_Service_Distribution();
+        $distrib = $distributionService->getDistribution($this->view->shipment['distribution_id']);
+        $this->view->distribution = $distrib;
+
 
         $platformService = new Application_Service_Platform();
         $this->view->platform = $platformService->getPlatform($platformID);
@@ -560,22 +566,22 @@ class Admin_ParticipantsController extends Zend_Controller_Action
             if ($performanceStats[$sample['sample_id']]['sdev_rvl'] > 0) {
                 $zscore2 = ($entry - $mean) / $sdev;
             }
-            if (strpos($sample['reported_viral_load'], '#') !== false){
+            if (strpos($sample['reported_viral_load'], '#') !== false) {
                 $overallScore += 0;
             } else {
                 if ($zscore2 < 2) {
                     $overallScore += 100;
                 }
                 if ($zscore2 >= 2 && $zscore2 < 3) {
-                    $overallScore+= 80;
+                    $overallScore += 80;
                 }
                 if ($zscore2 >= 3) {
-                    $overallScore+= 0;
+                    $overallScore += 0;
                 }
             }
             //
         }
-        $this->view->overallScore = ($overallScore/count($allSamples))??0;
+        $this->view->overallScore = ($overallScore / count($allSamples)) ?? 0;
         // calculate overall score />
 
         // get performance summary for the shipment
