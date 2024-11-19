@@ -92,6 +92,7 @@ $pdf->AddPage();
 
 $html = '<div style="border:2px solid black;">';
 
+$html .= '<span>' . json_encode($this->distribution) . '</span>';
 $html .= '<table style="padding:5px;margin:10px;"><tr><td>';
 
 $html .= '<div style="text-align:center;margin:5px;font-size:0.95em;"><b>';
