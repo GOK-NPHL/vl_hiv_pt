@@ -377,7 +377,8 @@ class ParticipantController extends Zend_Controller_Action {
         $this->view->shipment = $shipment;
 
         $distributionService = new Application_Service_Distribution();
-        $this->view->distribution = $distributionService->getDistribution($shipment['distribution_id']);
+        $distrib = $distributionService->getDistribution($shipment['distribution_id']);
+        $this->view->distribution = [];
 
         $platformService = new Application_Service_Platform();
         $this->view->platform = $platformService->getPlatform($platformID);
