@@ -671,7 +671,7 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
     {
         $use_platform_category = true;
         $output = [];
-        $query = "SELECT rrv.sample_id, ref.reference_result, COUNT(*) population, AVG(ROUND(rrv.reported_viral_load,1)) average_rvl, ROUND(STDDEV_POP(rrv.reported_viral_load),1) sdev_rvl FROM shipment_participant_map spm INNER JOIN response_result_vl rrv ON spm.map_id = rrv.shipment_map_id INNER JOIN reference_result_vl ref ON spm.shipment_id = ref.shipment_id AND rrv.sample_id = ref.sample_id WHERE spm.shipment_id = $shipmentID AND ref.control = 0 AND spm.is_pt_test_not_performed IS NULL ";
+        $query = "SELECT rrv.sample_id, rrv.reported_viral_load, COUNT(*) population, AVG(ROUND(rrv.reported_viral_load,4)) average_rvl, ROUND(STDDEV_POP(rrv.reported_viral_load),4) sdev_rvl FROM shipment_participant_map spm INNER JOIN response_result_vl rrv ON spm.map_id = rrv.shipment_map_id  WHERE spm.shipment_id = $shipmentID  AND spm.is_pt_test_not_performed IS NULL ";
         
         $platformIDs = array();
         if (isset($platformID) && $platformID != null && $platformID != '') {
@@ -689,6 +689,7 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
             } else {
                 $query .= " AND spm.platform_id = $platformID ";
             }
+            // $query .= " AND spm.platform_id = $platformID ";
         }
         $query .= " GROUP BY rrv.sample_id";
 
@@ -697,6 +698,18 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
 
         foreach ($rResult as $row) {
             $output[$row['sample_id']] = $row;
+            if ($row['sdev_rvl'] > 0) {
+                $score = ($row['reported_viral_load'] - $row['average_rvl']) / $row['sdev_rvl'];
+                if ($score < 2) {
+                    $output[$row['sample_id']]['calculated_score'] = 100;
+                } else if ($score >= 2 && $score < 3) {
+                    $output[$row['sample_id']]['calculated_score'] = 80;
+                } else {
+                    $output[$row['sample_id']]['calculated_score'] = 0;
+                }
+            } else {
+                $output[$row['sample_id']]['calculated_score'] = 100;
+            }
         }
 
         return $output;
@@ -734,7 +747,7 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
         }
 
         $consensusVLQuery = "SELECT s.shipment_id, spm.platform_id, refvl.sample_id, s.shipment_code, pl.PlatformName, " .
-            "refvl.sample_label, ROUND(AVG(IF(ISNULL(refvl.reference_result) OR refvl.reference_result = '', rrv.reported_viral_load, refvl.reference_result)),1) reference_result, ROUND(AVG(rrv.reported_viral_load),1) consensus, ROUND(stddev_pop(rrv.reported_viral_load),1) sdevp " .
+            "refvl.sample_label, ROUND(AVG(IF(ISNULL(refvl.reference_result) OR refvl.reference_result = '', rrv.reported_viral_load, refvl.reference_result)),3) reference_result, ROUND(AVG(rrv.reported_viral_load),3) consensus, ROUND(stddev_pop(rrv.reported_viral_load),3) sdevp " .
             "FROM reference_result_vl refvl " .
             "INNER JOIN shipment s ON refvl.shipment_id = s.shipment_id " .
             "INNER JOIN shipment_participant_map spm ON s.shipment_id = spm.shipment_id AND spm.is_pt_test_not_performed IS NULL " .
@@ -746,9 +759,9 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
         $responsesVLQuery = "SELECT spm.map_id, spm.shipment_id, spm.platform_id, spm.participant_id, p.MflCode AS lab_code, " .
             "p.institute_name, spm.report_generated, spm.shipment_score, spm.final_result, " .
             "d.distribution_name, results.PlatformName AS platform_name, results.sample_label, results.reference_result, " .
-            "ROUND(rrv.reported_viral_load,1) reported_viral_load, results.consensus, results.sdevp, " .
-            "ROUND(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result) /results.sdevp, 1) zscore," .
-            "IF(results.sdevp > 0, IF(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result) /results.sdevp <= 2, 1, IF(ABS(ROUND(rrv.reported_viral_load,1) - results.reference_result)/results.sdevp <= 3,0.8,0)), 1) AS score " .
+            "ROUND(rrv.reported_viral_load,3) reported_viral_load, results.consensus, results.sdevp, " .
+            "ROUND(ABS(ROUND(rrv.reported_viral_load,3) - results.reference_result) /results.sdevp, 3) zscore," .
+            "IF(results.sdevp > 0, IF(ABS(ROUND(rrv.reported_viral_load,3) - results.reference_result) /results.sdevp <= 2, 1, IF(ABS(ROUND(rrv.reported_viral_load,3) - results.reference_result)/results.sdevp <= 3,0.8,0)), 3) AS score " .
             "FROM shipment_participant_map spm " .
             "INNER JOIN shipment s ON spm.shipment_id = s.shipment_id $whereShipment " .
             "INNER JOIN distributions d ON s.distribution_id = d.distribution_id $whereDistribution " .
@@ -793,7 +806,7 @@ class Application_Model_DbTable_Distribution extends Zend_Db_Table_Abstract
             $row['lab_name'] = $aRow['lab_name'];
             $row['pass_fail'] = round($aRow['pass_fail'], 2);
             $row['score'] = $aRow['pass_fail'] >= $passMark ? "Acceptable" : "Unacceptable";
-            $row['samples'] = $aRow['samples'];
+            $row['reported_viral_load'] = $aRow['reported_viral_load'];
             $row['assay_name'] = $assay;
 
             $output['aaData'][] = $row;
