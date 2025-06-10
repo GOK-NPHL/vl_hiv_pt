@@ -123,8 +123,8 @@ class Application_Service_Schemes {
             ->where('sp.shipment_id = ? ', $shipmentID)
             ->where('sp.participant_id = ? ', $participantID)
             ->where('sp.assay_id = ?', $assayID)
-            // ->where('sp.platform_id = ? ', $platformID);
-            ->where('sp.platform_id in ( '. implode(',', $platformIds) . ')');
+            ->where('sp.platform_id = ? ', $platformID);
+            // ->where('sp.platform_id in ( '. implode(',', $platformIds) . ')');
 
         return $db->fetchAll($sql);
     }
